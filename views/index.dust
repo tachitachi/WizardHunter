@@ -3,9 +3,11 @@
   <head>
     <title>{title}</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script type='text/javascript' data-main='/javascripts/index' src='/javascripts/lib/require.js'></script>
   </head>
   <body>
-    <h1>{title}</h1>
-    <p>Welcome to {title}</p>
+    <div class="gameContainer">
+        <canvas id="game"></canvas>
+    </div>
   </body>
 </html>

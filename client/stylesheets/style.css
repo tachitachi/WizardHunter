@@ -1,0 +1,21 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.gameContainer {
+    width: 1280px;
+    height: 720px;
+    border: 1px solid black;
+    margin: auto;
+}
+
+
+#game {
+    width: 1280px;
+    height: 720px;
+}
