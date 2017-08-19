@@ -1,5 +1,5 @@
 requirejs.config({
-    baseUrl: '/javascripts',
+    baseUrl: '/',
     paths: {
         socketio: '../socket.io/socket.io',
     }
@@ -17,4 +17,4 @@ if (!String.prototype.format) {
     };
 }
 
-require(['main']);
+require(['client/javascripts/main']);

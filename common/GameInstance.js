@@ -4,7 +4,6 @@ var Player = require('./Player');
 var Creature = require('./Creature');
 var Effect = require('./Effect');
 var Map = require('./Map');
-var core = require('../../common/core');
 
 function GameInstance(){
     

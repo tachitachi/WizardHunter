@@ -2,8 +2,8 @@
 <html>
   <head>
     <title>{title}</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-    <script type='text/javascript' data-main='/javascripts/index' src='/javascripts/lib/require.js'></script>
+    <link rel='stylesheet' href='/client/stylesheets/style.css' />
+    <script type='text/javascript' data-main='/client/javascripts/index' src='/client/javascripts/lib/require.js'></script>
   </head>
   <body>
     <div class="gameContainer">

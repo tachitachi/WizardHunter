@@ -1,7 +1,7 @@
 
 define(function(require){
     
-    var global = require('global');
+    var global = require('client/javascripts/global');
     
     class Canvas {
         

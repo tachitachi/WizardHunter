@@ -2,10 +2,12 @@
 define(function(require){
     
     var io = require('socketio');
-    var Canvas = require('canvas');
-    var gfx = require('gfx');
-    var global = require('global');
-    var util = require('util');
+    var Canvas = require('client/javascripts/canvas');
+    var gfx = require('client/javascripts/gfx');
+    var global = require('client/javascripts/global');
+    var util = require('client/javascripts/util');
+    
+    var core = require('common/core');
     
     var socket = io();
     
@@ -18,7 +20,7 @@ define(function(require){
     var graph = canvas.cv.getContext('2d');
     var animHandle = null;
     
-    var GameState = require('GameState');
+    var GameState = require('client/javascripts/GameState');
     
     window.requestAnimFrame = (function() {
         return  window.requestAnimationFrame       ||
