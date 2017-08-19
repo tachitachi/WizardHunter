@@ -21,7 +21,8 @@ app.set('port', port);
 var server = http.createServer(app);
 var io = require('socket.io')(server);
 
-var instance = require('../server/lib/GameInstance')();
+// TODO: Change this to use a lobby system, instead of having a single hardcoded game
+var instance = require('../server/lib/ServerInstance')();
 
 var connection = require('../server/lib/connection')(io, instance);
 

@@ -1,28 +1,11 @@
-'use strict';
+(function(exports){
 
-
-function Map(){
+    console.log('this is map');
     
-    class Map {
-        
-        constructor(){
-            
-            console.log('Initializing Map');
-            
-            var self = this;
-            
-            // keep track of internal variables like health, animation time, etc
-            
-            self.width = 5000;
-            self.height = 5000;
-            
-        }
-        
-        
-    }
-    
-    return new Map();
-}
 
 
-module.exports = Map;
+    exports.test = function(){
+        return 'This is a function from shared module';
+    };
+
+}(typeof exports === 'undefined' ? this.Map = {} : exports));

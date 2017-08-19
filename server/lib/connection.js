@@ -1,5 +1,6 @@
 'use strict';
 
+// Interface between Client and Server
 function Connection(io, instance){
     
     class Connection {
