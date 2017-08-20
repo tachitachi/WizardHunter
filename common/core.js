@@ -1,24 +1,14 @@
 'use strict';
 
-(function(exports){
+define(function(require){
 
-    console.log('this is core');
+    console.log('this is core2');
 
-    if(typeof module !== 'undefined' && module.exports){
-        // running in node
-        var nodeInputs = require('./Inputs');
-        var Keys = nodeInputs.Keys;
-    }
-    else{
-        // running in browser
-        var Keys;
-        
-        // TODO: Find a better fix for this. Potentially a race condition
-        require(['common/Inputs'], function(){
-            Keys = Inputs.Keys;
-        
-        });
-    }
+    var Inputs = require('./Inputs');
+    var util = require('./util');
+    
+    
+    var Keys = Inputs.Keys;
     
     // core should take care of the core game logic
     // there should be nothing here about how network messages are sent, how often, interpolation, lag mitigation, etc
@@ -42,6 +32,12 @@
             this.moveY = null;
             
             this.moveSpeed = 300;
+            
+            // prev values for interpolation
+            
+            this._x = 0;
+            this._y = 0;
+            this._angle = 0;
         }
         
         move(delta){
@@ -70,6 +66,12 @@
             if(this.angle < 0){
                 this.angle += Math.PI * 2;
             }
+        }
+        
+        lerp(t){
+            var x = util.lerp(_playerX, playerX, lerp_t);
+            var y = util.lerp(_playerY, playerY, lerp_t);
+            var angle = util.angleLerp(_playerAngle, playerAngle, lerp_t);
         }
         
         get state(){
@@ -254,8 +256,10 @@
     } // End Instance
     
     
-    exports.Player = Player;
-    exports.Map = Map;
-    exports.Instance = Instance;
+    //exports.Player = Player;
+    //exports.Map = Map;
+    //exports.Instance = Instance;
+    
+    return {Player: Player, Map: Map, Instance: Instance};
 
-}(typeof exports === 'undefined' ? this.core = {} : exports));
+});

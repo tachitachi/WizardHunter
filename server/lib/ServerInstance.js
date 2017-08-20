@@ -1,5 +1,6 @@
 'use strict';
 
+require("amd-loader");
 var core = require('../../common/core');
 var Inputs = require('../../common/Inputs');
 

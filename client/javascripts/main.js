@@ -8,8 +8,8 @@ define(function(require){
     var util = require('client/javascripts/util');
     var _ = require('underscore');
     
-    require('common/core');
-    require('common/Inputs');
+    var core = require('common/core');
+    var Inputs = require('common/Inputs');
     
     var Instance = core.Instance;
     var InputQueue = Inputs.InputQueue;

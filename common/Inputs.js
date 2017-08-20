@@ -1,16 +1,7 @@
 'use strict';
 
-(function(exports){
+define(function(require){
 
-    console.log('this is Inputs');
-    
-    exports.actions = {
-        'move': ['x', 'y'],
-        'target': ['x', 'y'],
-        'skill': ['id'],
-        'stop': [],
-    };
-    
     
     // Keys are: left mouse, right mouse, q, w, e, r, a, s, d, f, space
     // 0 is up, 1 is down
@@ -95,7 +86,5 @@
         }
     }
     
-    exports.Keys = Keys;
-    exports.InputQueue = InputQueue;
-
-}(typeof exports === 'undefined' ? this.Inputs = {} : exports));
+    return {Keys: Keys, InputQueue: InputQueue};
+});

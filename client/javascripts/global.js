@@ -7,7 +7,7 @@
 
 define(function(require){
 
-    require('common/Inputs');
+    var Inputs = require('common/Inputs');
 
     return {
         targetX: 0,
