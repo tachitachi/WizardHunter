@@ -23,21 +23,21 @@ define(function(require){
     var instance = new Instance();
     
     
-    function sendInput(){
+    function sendInput(delta){
         var keys = _.extend([], global.keys.getKeys());
         var inputs = {keys: keys, targetX: global.targetX, targetY: global.targetY, sequenceId: sequenceId};
         socket.emit('input', inputs);
         
         sequenceId++;
         
-        queue.push(inputs);
+        queue.push(inputs, delta);
 
     }
     
     var canvas = new Canvas({
         onInput: function(){
-            console.log('clicked');
-            sendInput();
+            //console.log('clicked');
+            //sendInput();
         }
     });
     
@@ -93,6 +93,7 @@ define(function(require){
         var delta = newGameTick - prevGameTick;
         prevGameTick = newGameTick;
         
+        //console.log(delta);
         
         //gfx.drawCircle(graph, 100, 100, 10, 100);
         
@@ -141,7 +142,8 @@ define(function(require){
         }
         
         //socket.emit('tick', {targetX: global.targetX, targetY: global.targetY});
-        sendInput();
+        sendInput(delta);
+        //console.log(delta);
                     
         //gfx.drawTriangle(graph, 200, 200, 60, Math.PI * 00.5);
     }
@@ -162,9 +164,8 @@ define(function(require){
        
        //console.log(message.sequenceId, sequenceId, queue.length);
        
-       var prevTimestamp = queue.clear(message.sequenceId);
+       queue.clear(message.sequenceId);
        
-       //console.log('prev', prevTimestamp);
        
        var newTick = performance.now();
        _delta = (newTick - prevTick);
@@ -181,7 +182,7 @@ define(function(require){
        else{
            instance.copyState(initialState);
        }
-       instance.applyAllInputs(playerId, prevTimestamp, queue.queue);
+       instance.applyAllInputs(playerId, queue.queue);
        //queue.queue = [];
        
        

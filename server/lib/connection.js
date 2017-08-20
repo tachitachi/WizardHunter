@@ -42,26 +42,6 @@ function Connection(io, instance){
                 
             });
             
-//            socket.on('tick', function(message){
-//                // update player's facing
-//                //console.log(message);
-//                
-//                // TODO: Validate these
-//                var targetX = message.targetX;
-//                var targetY = message.targetY;
-//                
-//                self.instance.playerUpdate(socket.id, targetX, targetY);
-//            });
-//            
-//            
-//            socket.on('moveto', function(message){
-//                var x = message.x;
-//                var y = message.y;
-//                
-//                self.instance.playerMove(socket.id, x, y);
-//            });
-            
-            
             socket.on('input', function(inputs){
                 setTimeout(function(){
                     self.instance.updatePlayer(socket.id, inputs);

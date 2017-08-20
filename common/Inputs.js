@@ -71,8 +71,8 @@
             this.queue = [];
         }
         
-        push(inputs){
-            this.queue.push({input: inputs, timestamp: +new Date()});
+        push(inputs, delta){
+            this.queue.push({input: inputs, delta: delta});
         }
         
         pop(){
@@ -88,14 +88,10 @@
                 return null;
             }
             
-            var prevTimestamp = this.queue.length > 0 ? this.queue[0].timestamp : null;
-            
             while(this.queue.length > 0 && this.queue[0].input.sequenceId <= sequenceId){
                 var snapshot = this.pop()[0];
-                prevTimestamp = snapshot.timestamp;
             }
             
-            return prevTimestamp;
         }
     }
     

@@ -55,6 +55,9 @@
                 this.x += deltaX;
                 this.y += deltaY;
                 
+                this.x = Math.floor(this.x);
+                this.y = Math.floor(this.y);
+                
                 if((Math.abs(this.x - this.moveX) < 5) && (Math.abs(this.y - this.moveY) < 5)){
                     this.moveX = null;
                     this.moveY = null;
@@ -221,37 +224,26 @@
             
         }
         
-        applyAllInputs(playerId, prevTimestamp, inputSequence){
+        applyAllInputs(playerId, inputSequence){
             
             if(inputSequence.length === 0){
                 return;
             }
             
-            if(prevTimestamp === null){
-                prevTimestamp = inputSequence[0].timestamp;
-            }
-            
             var player = this.players[playerId];
             
-            var prevX = player.x;
-            var prevY = player.y;
-                
-            //console.log('prev', prevTimestamp);
-            //console.log('applying', inputSequence.length, 'inputs');
-            
-            var prev = prevTimestamp;
             for(var i in inputSequence){
                 var inputs = inputSequence[i];
-                var delta = (inputs.timestamp - prev) / 1000.0;
-                
                 this.applyInputs(playerId, inputs.input);
+                
+                    
+                var delta = inputs.delta / 1000.0;
+                
                 player.move(delta);
+                //console.log(delta);
                 
-                //console.log(player.x, player.y, inputs.input.keys[0], inputs.input.targetX, inputs.input.targetY);
                 
-                //console.log(inputs.input, delta);
                 
-                prev = inputs.timestamp;
             }
             
             
