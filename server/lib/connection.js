@@ -38,7 +38,7 @@ function Connection(io, instance){
                 
                 // remove player from instance
                 
-                self.instance.playerLeave(socket.id);
+                self.instance.playerLeave(socket);
                 
             });
             

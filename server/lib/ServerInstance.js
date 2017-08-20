@@ -22,7 +22,7 @@ function GameInstance(){
             this.sequenceIds = {};
             
             
-            this.clientUpdateInterval = setInterval(this.ClientUpdate.bind(this), 100); // 22 hz
+            this.clientUpdateInterval = setInterval(this.ClientUpdate.bind(this), 45); // 22 hz
             this.serverUpdateInterval = setInterval(this.ServerUpdate.bind(this), 15); // 66 hz
             
             this.prevTick = +new Date();
@@ -37,8 +37,12 @@ function GameInstance(){
             return playerId;
         }
         
-        playerLeave(id){
+        playerLeave(socket){
             // TODO: finish this
+            var playerId = this.playerIds[socket.id];
+            this.instance.removePlayer(playerId);
+            delete this.sockets[playerId];
+            delete this.sequenceIds[playerId];
         }
         
         // Handles continuous updates from the player (mouse direction and keypresses?)

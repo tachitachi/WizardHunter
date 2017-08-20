@@ -20,6 +20,8 @@ define(function(require){
     
     var sequenceId = 0;
     
+    var instance = new Instance();
+    
     
     function sendInput(){
         var keys = _.extend([], global.keys.getKeys());
@@ -33,7 +35,8 @@ define(function(require){
     }
     
     var canvas = new Canvas({
-        onInput: function(clickX, clickY){
+        onInput: function(){
+            console.log('clicked');
             sendInput();
         }
     });
@@ -99,27 +102,43 @@ define(function(require){
         graph.fillStyle = '#ffffff';
         graph.fillRect(0, 0, canvas.cv.width, canvas.cv.height);
         
-        if(_delta > 0 || delta > 0){
-            var x = util.lerp(_playerX, playerX, lerp_t);
-            var y = util.lerp(_playerY, playerY, lerp_t);
-            var angle = util.angleLerp(_playerAngle, playerAngle, lerp_t);
-        }
-        else{
-            var x = playerX;
-            var y = playerY;
-            var angle = playerAngle;
+        //console.log(instance.players);
+        
+        for(var i in instance.players){
+            var player = instance.players[i];
+            
+            gfx.drawPlayer(graph, player.x, player.y, player.angle);
         }
         
-        //console.log(x, y, angle, lerp_t);
-        
-        lerp_t += delta / _delta;
-        lerp_t = Math.min(lerp_t, 1);
-        lerp_t = Math.max(lerp_t, 0);
         
         
-        // This should be based on the GameState
-        // interpolate between prev and current based on delta
-        gfx.drawPlayer(graph, x, y, angle);
+        // all the old code
+        if(false){
+            
+            
+            if(_delta > 0 || delta > 0){
+                var x = util.lerp(_playerX, playerX, lerp_t);
+                var y = util.lerp(_playerY, playerY, lerp_t);
+                var angle = util.angleLerp(_playerAngle, playerAngle, lerp_t);
+            }
+            else{
+                var x = playerX;
+                var y = playerY;
+                var angle = playerAngle;
+            }
+            
+            //console.log(x, y, angle, lerp_t);
+            
+            lerp_t += delta / _delta;
+            lerp_t = Math.min(lerp_t, 1);
+            lerp_t = Math.max(lerp_t, 0);
+            
+            
+            // This should be based on the GameState
+            // interpolate between prev and current based on delta
+            gfx.drawPlayer(graph, x, y, angle);
+        
+        }
         
         //socket.emit('tick', {targetX: global.targetX, targetY: global.targetY});
         sendInput();
@@ -135,12 +154,17 @@ define(function(require){
         playerId = message.ID;
     });
     
+    var once = false;
+    var initialState = null;
+    
     socket.on('tick', function(message){
        //console.log(message);
        
-       console.log(message.sequenceId, sequenceId, queue.length);
+       //console.log(message.sequenceId, sequenceId, queue.length);
        
-       queue.clear(message.sequenceId);
+       var prevTimestamp = queue.clear(message.sequenceId);
+       
+       //console.log('prev', prevTimestamp);
        
        var newTick = performance.now();
        _delta = (newTick - prevTick);
@@ -148,6 +172,18 @@ define(function(require){
        lerp_t = 0;
        
        var playerList = message.playerList;
+       
+       if(!once){
+           instance.copyState(playerList);
+           initialState = playerList;
+           //once = true;
+       }
+       else{
+           instance.copyState(initialState);
+       }
+       instance.applyAllInputs(playerId, prevTimestamp, queue.queue);
+       //queue.queue = [];
+       
        
        for(var i in playerList){
            var player = playerList[i];

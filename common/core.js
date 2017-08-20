@@ -6,17 +6,19 @@
 
     if(typeof module !== 'undefined' && module.exports){
         // running in node
-        var Inputs = require('./Inputs');
+        var nodeInputs = require('./Inputs');
+        var Keys = nodeInputs.Keys;
     }
     else{
         // running in browser
-        console.log('running in browser');
-        var Inputs = require(['common/Inputs']);
+        var Keys;
+        
+        // TODO: Find a better fix for this. Potentially a race condition
+        require(['common/Inputs'], function(){
+            Keys = Inputs.Keys;
+        
+        });
     }
-    
-    
-    
-    var Keys = Inputs.Keys;
     
     // core should take care of the core game logic
     // there should be nothing here about how network messages are sent, how often, interpolation, lag mitigation, etc
@@ -74,10 +76,32 @@
                 x: this.x,
                 y: this.y,
                 angle: this.angle,
+                targetX: this.targetX,
+                targetY: this.targetY,
+                moveX: this.moveX,
+                moveY: this.moveY,
+                moveSpeed: this.moveSpeed,
+                
             }
             
             return s;
         }
+        
+        set state(s){
+            this.hp = s.hp;
+            this.x = s.x;
+            this.y = s.y;
+            this.angle = s.angle;
+            
+            this.targetX = s.targetX;
+            this.targetY = s.targetY;
+            
+            this.moveX = s.moveX;
+            this.moveY = s.moveY;
+            
+            this.moveSpeed = s.moveSpeed;
+        }
+        
     } // End Player
     
     
@@ -114,13 +138,17 @@
             //player.x = Math.floor(Math.random() * this.map.width);
             //player.y = Math.floor(Math.random() * this.map.height);
             
-            player.x = 200;
+            player.x = 400;
             player.y = 200;
             
             this.players[player.id] = player;
             
             return player.id;
             
+        }
+        
+        removePlayer(playerId){
+            delete this.players[playerId];
         }
         
         // This moves instantaneously
@@ -165,6 +193,69 @@
             this.playerUpdate(playerId, targetX, targetY);
             
             return inputs.sequenceId;
+        }
+        
+        // add more to this as the state space increases
+        copyState(playerList){
+            
+            for(var i in playerList){
+                var remotePlayer = playerList[i];
+                
+                if(!this.players.hasOwnProperty(remotePlayer.ID)){
+                    console.log('copying unknown player');
+                    this.players[remotePlayer.ID] = new Player();
+                }
+                
+                var localPlayer = this.players[remotePlayer.ID];
+                
+                //console.log(localPlayer.angle);
+                localPlayer.state = remotePlayer;
+                
+                //console.log(localPlayer.angle);
+                
+                //localPlayer.hp = remotePlayer.hp;
+                //localPlayer.x = remotePlayer.x;
+                //localPlayer.y = remotePlayer.y;
+                //localPlayer.angle = remotePlayer.angle;
+            }
+            
+        }
+        
+        applyAllInputs(playerId, prevTimestamp, inputSequence){
+            
+            if(inputSequence.length === 0){
+                return;
+            }
+            
+            if(prevTimestamp === null){
+                prevTimestamp = inputSequence[0].timestamp;
+            }
+            
+            var player = this.players[playerId];
+            
+            var prevX = player.x;
+            var prevY = player.y;
+                
+            //console.log('prev', prevTimestamp);
+            //console.log('applying', inputSequence.length, 'inputs');
+            
+            var prev = prevTimestamp;
+            for(var i in inputSequence){
+                var inputs = inputSequence[i];
+                var delta = (inputs.timestamp - prev) / 1000.0;
+                
+                this.applyInputs(playerId, inputs.input);
+                player.move(delta);
+                
+                //console.log(player.x, player.y, inputs.input.keys[0], inputs.input.targetX, inputs.input.targetY);
+                
+                //console.log(inputs.input, delta);
+                
+                prev = inputs.timestamp;
+            }
+            
+            
+            //console.log(player);
         }
         
         
