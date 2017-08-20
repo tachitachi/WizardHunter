@@ -6,14 +6,35 @@ define(function(require){
     var gfx = require('client/javascripts/gfx');
     var global = require('client/javascripts/global');
     var util = require('client/javascripts/util');
+    var _ = require('underscore');
     
-    var core = require('common/core');
+    require('common/core');
+    require('common/Inputs');
+    
+    var Instance = core.Instance;
+    var InputQueue = Inputs.InputQueue;
+    
+    var queue = new InputQueue();
     
     var socket = io();
     
+    var sequenceId = 0;
+    
+    
+    function sendInput(){
+        var keys = _.extend([], global.keys.getKeys());
+        var inputs = {keys: keys, targetX: global.targetX, targetY: global.targetY, sequenceId: sequenceId};
+        socket.emit('input', inputs);
+        
+        sequenceId++;
+        
+        queue.push(inputs);
+
+    }
+    
     var canvas = new Canvas({
-        onClick: function(clickX, clickY){
-            socket.emit('moveto', {x: clickX, y: clickY});
+        onInput: function(clickX, clickY){
+            sendInput();
         }
     });
     
@@ -100,7 +121,8 @@ define(function(require){
         // interpolate between prev and current based on delta
         gfx.drawPlayer(graph, x, y, angle);
         
-        socket.emit('tick', {targetX: global.targetX, targetY: global.targetY});
+        //socket.emit('tick', {targetX: global.targetX, targetY: global.targetY});
+        sendInput();
                     
         //gfx.drawTriangle(graph, 200, 200, 60, Math.PI * 00.5);
     }
@@ -115,6 +137,10 @@ define(function(require){
     
     socket.on('tick', function(message){
        //console.log(message);
+       
+       console.log(message.sequenceId, sequenceId, queue.length);
+       
+       queue.clear(message.sequenceId);
        
        var newTick = performance.now();
        _delta = (newTick - prevTick);

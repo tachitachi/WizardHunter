@@ -2,6 +2,7 @@ requirejs.config({
     baseUrl: '/',
     paths: {
         socketio: '../socket.io/socket.io',
+        underscore: 'client/javascripts/lib/underscore.min',
     }
 });
 

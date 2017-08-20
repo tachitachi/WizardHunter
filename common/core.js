@@ -3,6 +3,20 @@
 (function(exports){
 
     console.log('this is core');
+
+    if(typeof module !== 'undefined' && module.exports){
+        // running in node
+        var Inputs = require('./Inputs');
+    }
+    else{
+        // running in browser
+        console.log('running in browser');
+        var Inputs = require(['common/Inputs']);
+    }
+    
+    
+    
+    var Keys = Inputs.Keys;
     
     // core should take care of the core game logic
     // there should be nothing here about how network messages are sent, how often, interpolation, lag mitigation, etc
@@ -109,6 +123,7 @@
             
         }
         
+        // This moves instantaneously
         playerUpdate(id, targetX, targetY){
             if(!this.players.hasOwnProperty(id)){
                 // error?
@@ -124,6 +139,7 @@
             
         }
         
+        // TODO: add speed to this
         playerMove(id, x, y){
             if(!this.players.hasOwnProperty(id)){
                 // error?
@@ -138,6 +154,17 @@
         
         applyInputs(playerId, inputs){
             
+            var keys = new Keys(inputs.keys);
+            var targetX = inputs.targetX;
+            var targetY = inputs.targetY;
+            
+            if(keys.get('lmouse') === 1){
+                this.playerMove(playerId, targetX, targetY);
+            }
+            
+            this.playerUpdate(playerId, targetX, targetY);
+            
+            return inputs.sequenceId;
         }
         
         

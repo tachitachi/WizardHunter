@@ -16,22 +16,25 @@ define(function(require){
             self.originX = self.cv.width / 2;
             self.originY = self.cv.height / 2;
             
-            self.onClick = params.onClick;
+            self.onInput = params.onInput;
+            self.onMove = params.onMousemove;
             
             self.cv.addEventListener('mousemove', self.mousemove.bind(self), false);
             self.cv.addEventListener('mouseout', self.mouseout.bind(self), false);
             self.cv.addEventListener('keypress', self.keypress.bind(self), false);
-            self.cv.addEventListener('click', self.click.bind(self), false);
+            self.cv.addEventListener('mousedown', self.mousedown.bind(self), false);
+            self.cv.addEventListener('mouseup', self.mouseup.bind(self), false);
             
         }
         
-        click(event){
-            var self = this;
-            
-            var offsetX = event.offsetX - self.cv.width / 2;
-            var offsetY = event.offsetY - self.cv.height / 2;
-            
-            self.onClick(offsetX + self.originX, offsetY + self.originY);
+        mousedown(event){
+            global.keys.set('lmouse', 1);
+            this.onInput();
+        }
+        
+        mouseup(event){
+            global.keys.set('lmouse', 0);
+            this.onInput();
         }
         
         mousemove(event){
