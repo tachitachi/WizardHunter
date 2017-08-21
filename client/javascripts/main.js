@@ -70,7 +70,7 @@ define(function(require){
     }
     
     //var tick = 0;
-    var playerId = 0;
+    var playerId = null;
     var playerAngle = 0;
     var playerX = 200;
     var playerY = 200;
@@ -93,59 +93,26 @@ define(function(require){
         var delta = newGameTick - prevGameTick;
         prevGameTick = newGameTick;
         
-        //console.log(delta);
-        
-        //gfx.drawCircle(graph, 100, 100, 10, 100);
-        
-        //tick += 1;
-        
         // clear screen
         graph.fillStyle = '#ffffff';
         graph.fillRect(0, 0, canvas.cv.width, canvas.cv.height);
         
-        //console.log(instance.players);
         
         for(var i in instance.players){
-            var player = instance.players[i];
+            var player = instance.players[i].lerp(lerp_t);
+            //var player = instance.players[i];
             
             gfx.drawPlayer(graph, player.x, player.y, player.angle);
         }
         
         
+        lerp_t += delta / _delta;
+        lerp_t = Math.min(lerp_t, 1);
+        lerp_t = Math.max(lerp_t, 0);
+            
         
-        // all the old code
-        if(false){
-            
-            
-            if(_delta > 0 || delta > 0){
-                var x = util.lerp(_playerX, playerX, lerp_t);
-                var y = util.lerp(_playerY, playerY, lerp_t);
-                var angle = util.angleLerp(_playerAngle, playerAngle, lerp_t);
-            }
-            else{
-                var x = playerX;
-                var y = playerY;
-                var angle = playerAngle;
-            }
-            
-            //console.log(x, y, angle, lerp_t);
-            
-            lerp_t += delta / _delta;
-            lerp_t = Math.min(lerp_t, 1);
-            lerp_t = Math.max(lerp_t, 0);
-            
-            
-            // This should be based on the GameState
-            // interpolate between prev and current based on delta
-            gfx.drawPlayer(graph, x, y, angle);
-        
-        }
-        
-        //socket.emit('tick', {targetX: global.targetX, targetY: global.targetY});
+
         sendInput(delta);
-        //console.log(delta);
-                    
-        //gfx.drawTriangle(graph, 200, 200, 60, Math.PI * 00.5);
     }
     
     
@@ -155,9 +122,6 @@ define(function(require){
     socket.on('joined', function(message){
         playerId = message.ID;
     });
-    
-    var once = false;
-    var initialState = null;
     
     socket.on('tick', function(message){
        //console.log(message);
@@ -174,14 +138,7 @@ define(function(require){
        
        var playerList = message.playerList;
        
-       if(!once){
-           instance.copyState(playerList);
-           initialState = playerList;
-           //once = true;
-       }
-       else{
-           instance.copyState(initialState);
-       }
+       instance.copyState(playerList);
        instance.applyAllInputs(playerId, queue.queue);
        //queue.queue = [];
        

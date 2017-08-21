@@ -33,15 +33,18 @@ define(function(require){
             
             this.moveSpeed = 300;
             
-            // prev values for interpolation
+            // previous values for interpolation
             
             this._x = 0;
             this._y = 0;
             this._angle = 0;
+            
+            this.init = true;
         }
         
         move(delta){
             // move toward the move target
+            
             if(this.moveX !== null && this.moveY !== null){
                 
                 var moveAngle = Math.atan2(this.moveY - this.y, this.moveX - this.x);
@@ -68,10 +71,19 @@ define(function(require){
             }
         }
         
+        // interpolate the entity between the previous update and the current
         lerp(t){
-            var x = util.lerp(_playerX, playerX, lerp_t);
-            var y = util.lerp(_playerY, playerY, lerp_t);
-            var angle = util.angleLerp(_playerAngle, playerAngle, lerp_t);
+            var x = util.lerp(this._x, this.x, t);
+            var y = util.lerp(this._y, this.y, t);
+            var angle = util.angleLerp(this._angle, this.angle, t);
+            
+            var s = this.state;
+            
+            s.x = x;
+            s.y = y;
+            s.angle = angle;
+            
+            return s;
         }
         
         get state(){
@@ -93,6 +105,22 @@ define(function(require){
         }
         
         set state(s){
+            
+            // Do not interpolate if this unit was newly created
+            if(this.init){
+                this.init = false;
+                this._x = s.x;
+                this._y = s.y;
+                this._angle = s.angle;
+            }
+            else{
+                // any values that should be interpolated need to be copied here
+                
+                this._x = this.x;
+                this._y = this.y;
+                this._angle = this.angle;
+            }
+            
             this.hp = s.hp;
             this.x = s.x;
             this.y = s.y;
@@ -115,8 +143,8 @@ define(function(require){
             console.log('Initializing Map');
             // keep track of internal variables like health, animation time, etc
             
-            this.width = 5000;
-            this.height = 5000;
+            this.width = 1000;
+            this.height = 700;
         }
     } // End Map
 
@@ -140,11 +168,11 @@ define(function(require){
             this.nextId += 1;
             
             
-            //player.x = Math.floor(Math.random() * this.map.width);
-            //player.y = Math.floor(Math.random() * this.map.height);
+            player.x = Math.floor(Math.random() * this.map.width);
+            player.y = Math.floor(Math.random() * this.map.height);
             
-            player.x = 400;
-            player.y = 200;
+            //player.x = 400;
+            //player.y = 200;
             
             this.players[player.id] = player;
             
@@ -213,8 +241,10 @@ define(function(require){
                 
                 var localPlayer = this.players[remotePlayer.ID];
                 
+                
                 //console.log(localPlayer.angle);
                 localPlayer.state = remotePlayer;
+                
                 
                 //console.log(localPlayer.angle);
                 
@@ -233,6 +263,9 @@ define(function(require){
             }
             
             var player = this.players[playerId];
+            if(player === undefined){
+                return;
+            }
             
             for(var i in inputSequence){
                 var inputs = inputSequence[i];
@@ -248,8 +281,6 @@ define(function(require){
                 
             }
             
-            
-            //console.log(player);
         }
         
         
