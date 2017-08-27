@@ -89,11 +89,20 @@ define(function(require){
         graph.fillRect(0, 0, canvas.cv.width, canvas.cv.height);
         
         
+        // draw players
         for(var i in instance.players){
             var player = instance.players[i].lerp(lerp_t);
-            //var player = instance.players[i];
             
             gfx.drawPlayer(graph, player.x, player.y, player.angle);
+        }
+
+        // TODO: Group all of map drawing into a single function?
+
+        // draw obstacles on map
+        for(var i in instance.map.obstacles){
+            var obstacle = instance.map.obstacles[i].lerp(lerp_t);
+            
+            gfx.drawRock(graph, obstacle.x, obstacle.y, obstacle.size);
         }
         
         
@@ -111,7 +120,7 @@ define(function(require){
     socket.emit('init', {});
     
     socket.on('joined', function(message){
-        playerId = message.ID;
+        playerId = message.id;
     });
     
     socket.on('tick', function(message){

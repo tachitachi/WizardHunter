@@ -6,6 +6,7 @@ define(function(require){
 
     var Inputs = require('./Inputs');
     var util = require('./util');
+    var Obstacle = require('./Obstacle');
     
     
     var Keys = Inputs.Keys;
@@ -88,7 +89,7 @@ define(function(require){
         
         get state(){
             var s = {
-                ID: this.id,
+                id: this.id,
                 hp: this.hp,
                 x: this.x,
                 y: this.y,
@@ -145,6 +146,45 @@ define(function(require){
             
             this.width = 1000;
             this.height = 700;
+
+            this.obstacles = {};
+
+            // randomly add obstacles
+            for(var i = 0; i < 5; i++){
+                var x = Math.floor(Math.random() * this.width);
+                var y = Math.floor(Math.random() * this.height);
+                var obstacle = new Obstacle(i);
+
+                obstacle.initialize(x, y, {type: 0, size: Math.random() * 15 + 5, movable: false, breakable: false})
+
+                this.obstacles[i] = obstacle;
+            }
+        }
+
+
+
+        get state(){
+            var state = {obstacles: this.obstacles};
+            return state;
+        }
+
+        set state(state){
+            for(var i in this.obstacles){
+                if(!state.obstacles.hasOwnProperty(i)){
+                    delete this.obstacles[i];
+                }
+            }
+
+            for(var i in state.obstacles){
+                var remoteObstacle = state.obstacles[i];
+                if(!this.obstacles.hasOwnProperty(i)){
+                    this.obstacles[i] = new Obstacle(remoteObstacle.id);
+                    this.obstacles[i].initialize(remoteObstacle.x, remoteObstacle.y);
+                }
+
+                this.obstacles[i].state = remoteObstacle;
+            }
+
         }
     } // End Map
 
@@ -236,6 +276,7 @@ define(function(require){
             // ignore AoI for now
 
             s.players = this.players;
+            s.map = this.map.state;
 
             return s;
         }
@@ -266,6 +307,12 @@ define(function(require){
                 
                 localPlayer.state = remotePlayer;
             }
+
+
+
+            var remoteMap = state.map;
+            this.map.state = remoteMap;
+
             
         }
         

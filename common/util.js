@@ -15,6 +15,9 @@ define(function(require){
             
             return a + shortAngleDist(a,b)*t;
         },
+        get: function(obj, prop, d){
+            return obj.hasOwnProperty(prop) ? obj[prop] : d; 
+        },
         
     };
 });

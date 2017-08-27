@@ -28,7 +28,7 @@ function Connection(io, instance){
                 // place player in instance, tell player if successful?
                 
                 var id = self.instance.playerJoin(socket);
-                socket.emit('joined', {ID: id});
+                socket.emit('joined', {id: id});
                 
                 
             });

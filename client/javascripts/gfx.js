@@ -58,6 +58,15 @@ define(function(require){
             
             gfx.drawTriangle(graph, pointerX, pointerY, triangleSize, angle);
         },
+
+        drawRock: function(graph, centerX, centerY, size){
+            graph.strokeStyle = 'hsl(' + 19 + ', 98%, 22%)';
+            graph.fillStyle = 'hsl(' + 29 + ', 100%, 70%)';
+            
+            var sides = 6;
+            
+            gfx.drawCircle(graph, centerX, centerY, size, sides);
+        },
     
     }
     
