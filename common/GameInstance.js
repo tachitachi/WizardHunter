@@ -1,66 +1,58 @@
 'use strict';
 
-var Player = require('./Player');
-var Creature = require('./Creature');
-var Effect = require('./Effect');
-var Map = require('./Map');
 
-function GameInstance(){
-    
+define(function(require){
+
+
+    var Player = require('./Player');
+    var GameMap = require('./GameMap');
+    var Inputs = require('./Inputs');
+    var Keys = Inputs.Keys;
+
     class GameInstance {
         constructor(){
-            console.log('Initializing game instance');
+            console.log('Initializing Instance');
             
-            var self = this;
+            this.map = new GameMap();
             
-            self.map = Map();
+            this.players = {};
+            this.enemies = {};
+            this.effects = {};
             
-            self.players = {};
-            self.enemies = {};
-            self.effects = {};
+            this.nextId = 0;
             
-            
-            self.clientUpdateInterval = setInterval(self.ClientUpdate.bind(self), 100); // 22 hz
-            self.serverUpdateInterval = setInterval(self.ServerUpdate.bind(self), 15); // 66 hz
-            
-            self.nextId = 0;
-            self.prevTick = (new Date()).getTime();
         }
+
         
-        
-        playerJoin(socket){
-            var self = this;
-            var player = Player(self.nextId, socket);
-            self.nextId += 1;
+        addPlayer(){
+            var player = new Player(this.nextId);
+            this.nextId += 1;
             
             
-            //player.x = Math.floor(Math.random() * self.map.width);
-            //player.y = Math.floor(Math.random() * self.map.height);
+            player.x = Math.floor(Math.random() * this.map.width);
+            player.y = Math.floor(Math.random() * this.map.height);
             
-            player.x = 200;
-            player.y = 200;
+            //player.x = 400;
+            //player.y = 200;
             
-            
-            self.players[socket.id] = player;
+            this.players[player.id] = player;
             
             return player.id;
             
         }
         
-        playerLeave(id){
-            var self = this;
-            delete self.players[id];
+        removePlayer(playerId){
+            delete this.players[playerId];
         }
         
-        // Handles continuous updates from the player (mouse direction and keypresses?)
+        // This moves instantaneously
         playerUpdate(id, targetX, targetY){
-            var self = this;
-            if(!self.players.hasOwnProperty(id)){
+            if(!this.players.hasOwnProperty(id)){
                 // error?
                 return;
             }
             
-            var player = self.players[id];
+            var player = this.players[id];
             
             if(targetX !== null && targetY !== null){
                 player.targetX = targetX;
@@ -69,62 +61,111 @@ function GameInstance(){
             
         }
         
+        // TODO: add speed to this
         playerMove(id, x, y){
-            var self = this;
-            
-            if(!self.players.hasOwnProperty(id)){
+            if(!this.players.hasOwnProperty(id)){
                 // error?
                 return;
             }
             
-            var player = self.players[id];
+            var player = this.players[id];
             
             player.moveX = x;
             player.moveY = y;
         }
         
-        
-        ClientUpdate(){
-            var self = this;
+        applyInputs(playerId, inputs){
             
-            var playerList = [];
+            var keys = new Keys(inputs.keys);
+            var targetX = inputs.targetX;
+            var targetY = inputs.targetY;
             
-            for(var id in self.players){
-                var player = self.players[id];
-                playerList.push(player.state);
+            if(keys.get('lmouse') === 1){
+                this.playerMove(playerId, targetX, targetY);
             }
             
-            // broadcast new state to each player
-            // TODO: Use AoI to determine what info needs to be sent?
-            for(var id in self.players){
-                var player = self.players[id];
-                player.socket.emit('tick', {playerList: playerList});
-            }
+            this.playerUpdate(playerId, targetX, targetY);
+            
+            return inputs.sequenceId;
         }
         
-        ServerUpdate(){
-            var self = this;
-            // update player movements, AI actions, health, etc
-            
-            var newTick = (new Date()).getTime();
-            var delta = (newTick - self.prevTick) / 1000;
-            
-            // move each player
-            for(var id in self.players){
-                var player = self.players[id];
+
+        getState(playerId, useAoI){
+            var s = {};
+
+            // ignore AoI for now
+
+            s.players = this.players;
+            s.map = this.map.state;
+
+            return s;
+        }
+
+        // add more to this as the state space increases
+        copyState(state){
+
+            var remotePlayers = state.players;
+
+            // remove old players
+            for(var i in this.players){
+                if(!remotePlayers.hasOwnProperty(i)){
+                    delete this.players[i];
+                }
+            }
+
+            // Update and add any new players            
+            for(var i in remotePlayers){
+                var remotePlayer = remotePlayers[i];
                 
-                // TODO: use delta
-                player.move(delta);
+                if(!this.players.hasOwnProperty(remotePlayer.id)){
+                    console.log('copying unknown player');
+                    this.players[remotePlayer.id] = new Player();
+                }
+                
+                var localPlayer = this.players[remotePlayer.id];
+                
+                
+                localPlayer.state = remotePlayer;
             }
-            
-            self.prevTick = newTick;
+
+
+
+            var remoteMap = state.map;
+            this.map.state = remoteMap;
+
             
         }
         
-    }
-    
-    return new GameInstance();
-}
+        applyAllInputs(playerId, inputSequence){
 
+            if(inputSequence.length === 0){
+                return;
+            }
+            
+            var player = this.players[playerId];
+            if(player === undefined){
+                return;
+            }
+            
+            for(var i in inputSequence){
+                var inputs = inputSequence[i];
+                this.applyInputs(playerId, inputs.input);
+                
+                    
+                var delta = inputs.delta / 1000.0;
+                
+                player.move(delta);
+                //console.log(delta);
+                
+                
+                
+            }
+            
+        }
+        
+        
+    } // End Instance
 
-module.exports = GameInstance;
+    return GameInstance;
+
+});
