@@ -162,6 +162,7 @@ define(function(require){
             this.nextId = 0;
             
         }
+
         
         addPlayer(){
             var player = new Player(this.nextId);
@@ -228,36 +229,48 @@ define(function(require){
             return inputs.sequenceId;
         }
         
+
+        getState(playerId, useAoI){
+            var s = {};
+
+            // ignore AoI for now
+
+            s.players = this.players;
+
+            return s;
+        }
+
         // add more to this as the state space increases
-        copyState(playerList){
-            
-            for(var i in playerList){
-                var remotePlayer = playerList[i];
+        copyState(state){
+
+            var remotePlayers = state.players;
+
+            // remove old players
+            for(var i in this.players){
+                if(!remotePlayers.hasOwnProperty(i)){
+                    delete this.players[i];
+                }
+            }
+
+            // Update and add any new players            
+            for(var i in remotePlayers){
+                var remotePlayer = remotePlayers[i];
                 
-                if(!this.players.hasOwnProperty(remotePlayer.ID)){
+                if(!this.players.hasOwnProperty(remotePlayer.id)){
                     console.log('copying unknown player');
-                    this.players[remotePlayer.ID] = new Player();
+                    this.players[remotePlayer.id] = new Player();
                 }
                 
-                var localPlayer = this.players[remotePlayer.ID];
+                var localPlayer = this.players[remotePlayer.id];
                 
                 
-                //console.log(localPlayer.angle);
                 localPlayer.state = remotePlayer;
-                
-                
-                //console.log(localPlayer.angle);
-                
-                //localPlayer.hp = remotePlayer.hp;
-                //localPlayer.x = remotePlayer.x;
-                //localPlayer.y = remotePlayer.y;
-                //localPlayer.angle = remotePlayer.angle;
             }
             
         }
         
         applyAllInputs(playerId, inputSequence){
-            
+
             if(inputSequence.length === 0){
                 return;
             }

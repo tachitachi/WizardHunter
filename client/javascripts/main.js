@@ -69,16 +69,7 @@ define(function(require){
         gameLoop(timestamp);
     }
     
-    //var tick = 0;
     var playerId = null;
-    var playerAngle = 0;
-    var playerX = 200;
-    var playerY = 200;
-    
-    var _playerAngle = 0;
-    var _playerX = 200;
-    var _playerY = 200;
-    
     var _delta = 0;
     var lerp_t = 0;
     
@@ -124,39 +115,19 @@ define(function(require){
     });
     
     socket.on('tick', function(message){
-       //console.log(message);
+
+        // Clear all processed inputs
+        queue.clear(message.sequenceId);
        
-       //console.log(message.sequenceId, sequenceId, queue.length);
-       
-       queue.clear(message.sequenceId);
-       
-       
-       var newTick = performance.now();
-       _delta = (newTick - prevTick);
-       prevTick = newTick;
-       lerp_t = 0;
-       
-       var playerList = message.playerList;
-       
-       instance.copyState(playerList);
-       instance.applyAllInputs(playerId, queue.queue);
-       //queue.queue = [];
-       
-       
-       for(var i in playerList){
-           var player = playerList[i];
-           
-           if(player.ID === playerId){
-               
-               _playerAngle = playerAngle;
-               _playerX = playerX;
-               _playerY = playerY;
-               
-               playerAngle = player.angle;
-               playerX = player.x;
-               playerY = player.y;
-           }
-       }
+        var newTick = performance.now();
+        _delta = (newTick - prevTick);
+        prevTick = newTick;
+        lerp_t = 0;
+
+        var state = message.state;
+
+        instance.copyState(state);
+        instance.applyAllInputs(playerId, queue.queue);
        
     });
     
