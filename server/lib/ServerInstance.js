@@ -47,14 +47,14 @@ function GameInstance(){
         }
         
         // Handles continuous updates from the player (mouse direction and keypresses?)
-        playerUpdate(socketId, targetX, targetY){
+        setPlayerLook(socketId, targetX, targetY){
             var playerId = this.playerIds[socketId];
-            this.instance.playerUpdate(playerId, targetX, targetY);
+            this.instance.setPlayerLook(playerId, targetX, targetY);
         }
         
-        playerMove(socketId, x, y){
+        setPlayerMove(socketId, x, y){
             var playerId = this.playerIds[socketId];
-            this.instance.playerMove(playerId, x, y);
+            this.instance.setPlayerMove(playerId, x, y);
         }
         
         updatePlayer(socketId, inputs){
@@ -94,7 +94,8 @@ function GameInstance(){
                 var player = this.instance.players[id];
                 
                 // TODO: use delta
-                player.move(delta);
+                this.instance.updatePlayer(player.id, delta);
+                //player.move(delta);
             }
             
             this.prevTick = newTick;

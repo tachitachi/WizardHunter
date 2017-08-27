@@ -6,11 +6,11 @@ define(function(require){
 
     var GameMap = require('./GameMap');
     var Player = require('./Player');
-    var GameInstance = require('./GameInstance');
+    var Instance = require('./Instance');
     
     // core should take care of the core game logic
     // there should be nothing here about how network messages are sent, how often, interpolation, lag mitigation, etc
 
-    return {Player: Player, Map: GameMap, Instance: GameInstance};
+    return {Player: Player, Map: GameMap, Instance: Instance};
 
 });

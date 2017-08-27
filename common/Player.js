@@ -34,31 +34,9 @@ define(function(require){
         
         move(delta){
             // move toward the move target
+            // How to take into account collisions?
             
-            if(this.moveX !== null && this.moveY !== null){
-                
-                var moveAngle = Math.atan2(this.moveY - this.y, this.moveX - this.x);
-                var deltaX = this.moveSpeed * delta * Math.cos(moveAngle);
-                var deltaY = this.moveSpeed * delta * Math.sin(moveAngle);
-                
-                this.x += deltaX;
-                this.y += deltaY;
-                
-                this.x = Math.floor(this.x);
-                this.y = Math.floor(this.y);
-                
-                if((Math.abs(this.x - this.moveX) < 5) && (Math.abs(this.y - this.moveY) < 5)){
-                    this.moveX = null;
-                    this.moveY = null;
-                }
-            }
-            
-            // calculate new angle
-            // y axis is reversed, because down is +y
-            this.angle = Math.atan2(this.y - this.targetY, this.targetX - this.x);
-            if(this.angle < 0){
-                this.angle += Math.PI * 2;
-            }
+            console.log('deprecated');
         }
         
         // interpolate the entity between the previous update and the current

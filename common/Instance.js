@@ -9,7 +9,7 @@ define(function(require){
     var Inputs = require('./Inputs');
     var Keys = Inputs.Keys;
 
-    class GameInstance {
+    class Instance {
         constructor(){
             console.log('Initializing Instance');
             
@@ -28,12 +28,9 @@ define(function(require){
             var player = new Player(this.nextId);
             this.nextId += 1;
             
-            
+            // TODO: Make sure the player does not spawn in non walkable area
             player.x = Math.floor(Math.random() * this.map.width);
             player.y = Math.floor(Math.random() * this.map.height);
-            
-            //player.x = 400;
-            //player.y = 200;
             
             this.players[player.id] = player;
             
@@ -46,7 +43,7 @@ define(function(require){
         }
         
         // This moves instantaneously
-        playerUpdate(id, targetX, targetY){
+        setPlayerLook(id, targetX, targetY){
             if(!this.players.hasOwnProperty(id)){
                 // error?
                 return;
@@ -62,7 +59,7 @@ define(function(require){
         }
         
         // TODO: add speed to this
-        playerMove(id, x, y){
+        setPlayerMove(id, x, y){
             if(!this.players.hasOwnProperty(id)){
                 // error?
                 return;
@@ -73,6 +70,39 @@ define(function(require){
             player.moveX = x;
             player.moveY = y;
         }
+
+        updatePlayer(id, delta){
+            var player = this.players[id];
+            if(player === undefined){
+                return;
+            }
+
+
+            if(player.moveX !== null && player.moveY !== null){
+                
+                var moveAngle = Math.atan2(player.moveY - player.y, player.moveX - player.x);
+                var deltaX = player.moveSpeed * delta * Math.cos(moveAngle);
+                var deltaY = player.moveSpeed * delta * Math.sin(moveAngle);
+                
+                player.x += deltaX;
+                player.y += deltaY;
+                
+                player.x = Math.floor(player.x);
+                player.y = Math.floor(player.y);
+                
+                if((Math.abs(player.x - player.moveX) < 5) && (Math.abs(player.y - player.moveY) < 5)){
+                    player.moveX = null;
+                    player.moveY = null;
+                }
+            }
+            
+            // calculate new angle
+            // y axis is reversed, because down is +y
+            player.angle = Math.atan2(player.y - player.targetY, player.targetX - player.x);
+            if(player.angle < 0){
+                player.angle += Math.PI * 2;
+            }
+        }
         
         applyInputs(playerId, inputs){
             
@@ -81,10 +111,10 @@ define(function(require){
             var targetY = inputs.targetY;
             
             if(keys.get('lmouse') === 1){
-                this.playerMove(playerId, targetX, targetY);
+                this.setPlayerMove(playerId, targetX, targetY);
             }
             
-            this.playerUpdate(playerId, targetX, targetY);
+            this.setPlayerLook(playerId, targetX, targetY);
             
             return inputs.sequenceId;
         }
@@ -154,7 +184,7 @@ define(function(require){
                     
                 var delta = inputs.delta / 1000.0;
                 
-                player.move(delta);
+                this.updatePlayer(playerId, delta);
                 //console.log(delta);
                 
                 
@@ -166,6 +196,6 @@ define(function(require){
         
     } // End Instance
 
-    return GameInstance;
+    return Instance;
 
 });
