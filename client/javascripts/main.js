@@ -41,7 +41,6 @@ define(function(require){
         }
     });
     
-    var graph = canvas.cv.getContext('2d');
     var animHandle = null;
     
     var GameState = require('client/javascripts/GameState');
@@ -85,15 +84,23 @@ define(function(require){
         prevGameTick = newGameTick;
         
         // clear screen
-        graph.fillStyle = '#ffffff';
-        graph.fillRect(0, 0, canvas.cv.width, canvas.cv.height);
+
+        gfx.clear(canvas);
+
+        var myPlayer = instance.players[playerId];
+        if(myPlayer !== undefined){
+            // center camera around player plus some offset based on the mouse position
+            var player = myPlayer.lerp(lerp_t);
+            canvas.centerX = player.x + global.offsetX / 5;
+            canvas.centerY = player.y + global.offsetY / 5;
+        }
         
         
         // draw players
         for(var i in instance.players){
             var player = instance.players[i].lerp(lerp_t);
             
-            gfx.drawPlayer(graph, player.x, player.y, player.angle);
+            gfx.drawPlayer(canvas, player.x, player.y, player.angle, player.size);
         }
 
         // TODO: Group all of map drawing into a single function?
@@ -102,7 +109,7 @@ define(function(require){
         for(var i in instance.map.obstacles){
             var obstacle = instance.map.obstacles[i].lerp(lerp_t);
             
-            gfx.drawRock(graph, obstacle.x, obstacle.y, obstacle.size);
+            gfx.drawRock(canvas, obstacle.x, obstacle.y, obstacle.size);
         }
         
         

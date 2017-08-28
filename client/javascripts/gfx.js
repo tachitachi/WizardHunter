@@ -3,27 +3,31 @@ define(function(require){
 
 
     var gfx = {
-        drawCircle: function(graph, centerX, centerY, radius, sides) {
+        clear: function(canvas){
+            canvas.graph.fillStyle = '#ffffff';
+            canvas.graph.fillRect(0, 0, canvas.cv.width, canvas.cv.height);
+        },
+        drawCircle: function(canvas, centerX, centerY, radius, sides) {
             var theta = 0;
             var x = 0;
             var y = 0;
 
-            graph.beginPath();
+            canvas.graph.beginPath();
 
             for (var i = 0; i < sides; i++) {
                 theta = (i / sides) * 2 * Math.PI;
                 x = centerX + radius * Math.sin(theta);
                 y = centerY + radius * Math.cos(theta);
-                graph.lineTo(x, y);
+                canvas.graph.lineTo(canvas.transformX(x), canvas.transformY(y));
             }
 
-            graph.closePath();
-            graph.stroke();
-            graph.fill();
+            canvas.graph.closePath();
+            canvas.graph.stroke();
+            canvas.graph.fill();
         },
-        drawTriangle: function(graph, centerX, centerY, size, angle){
+        drawTriangle: function(canvas, centerX, centerY, size, angle){
             
-            graph.beginPath();
+            canvas.graph.beginPath();
             
             var theta = angle;
             for(var i = 0; i < 3; i++){
@@ -32,40 +36,39 @@ define(function(require){
                 
                 theta += Math.PI * 2 / 3;
                 
-                graph.lineTo(x, y);
+                canvas.graph.lineTo(canvas.transformX(x), canvas.transformY(y));
             }
             
-            graph.closePath();
-            graph.stroke();
-            graph.fill();
+            canvas.graph.closePath();
+            canvas.graph.stroke();
+            canvas.graph.fill();
         },
         
-        drawPlayer: function(graph, centerX, centerY, angle){
-            graph.strokeStyle = 'hsl(' + 250 + ', 100%, 45%)';
-            graph.fillStyle = 'hsl(' + 250 + ', 100%, 70%)';
+        drawPlayer: function(canvas, centerX, centerY, angle, size){
+            canvas.graph.strokeStyle = 'hsl(' + 250 + ', 100%, 45%)';
+            canvas.graph.fillStyle = 'hsl(' + 250 + ', 100%, 70%)';
             
-            var playerSize = 50;
             var playerSides = 25;
             
-            gfx.drawCircle(graph, centerX, centerY, playerSize, playerSides);
+            gfx.drawCircle(canvas, centerX, centerY, size, playerSides);
             
             angle = angle + Math.PI / 2;
             
-            var r = playerSize * 1.2;
+            var r = size * 1.2;
             var pointerX = centerX + r * Math.sin(angle);
             var pointerY = centerY + r * Math.cos(angle);
             var triangleSize = 10;
             
-            gfx.drawTriangle(graph, pointerX, pointerY, triangleSize, angle);
+            gfx.drawTriangle(canvas, pointerX, pointerY, triangleSize, angle);
         },
 
-        drawRock: function(graph, centerX, centerY, size){
-            graph.strokeStyle = 'hsl(' + 19 + ', 98%, 22%)';
-            graph.fillStyle = 'hsl(' + 29 + ', 100%, 70%)';
+        drawRock: function(canvas, centerX, centerY, size){
+            canvas.graph.strokeStyle = 'hsl(' + 19 + ', 98%, 22%)';
+            canvas.graph.fillStyle = 'hsl(' + 29 + ', 100%, 70%)';
             
             var sides = 6;
             
-            gfx.drawCircle(graph, centerX, centerY, size, sides);
+            gfx.drawCircle(canvas, centerX, centerY, size, sides);
         },
     
     }

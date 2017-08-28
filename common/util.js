@@ -18,6 +18,24 @@ define(function(require){
         get: function(obj, prop, d){
             return obj.hasOwnProperty(prop) ? obj[prop] : d; 
         },
-        
+        getRigidCollisions: function(objA, deltaX, deltaY, objects){
+            // simple pairwise testing for collision
+            // assumes all test objects are immovable
+
+            for(var i in objects){
+                var object = objects[i];
+                var dist2 = Math.pow(objA.x + deltaX - object.x, 2) + Math.pow(objA.y + deltaY - object.y, 2);
+                var rad2 = Math.pow(objA.size, 2) + Math.pow(object.size, 2);
+
+                if(dist2 < rad2){
+                    return {x: 0, y: 0};
+                }
+            }
+
+            // return a new deltaX, and deltaY to use instead
+
+            return {x: deltaX, y: deltaY};
+
+        },
     };
 });

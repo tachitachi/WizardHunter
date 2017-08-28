@@ -5,7 +5,7 @@ define(function(require){
 
 
     var Obstacle = require('./Obstacle');
-    
+
 	class GameMap {
         constructor(){
             console.log('Initializing Map');
@@ -17,7 +17,7 @@ define(function(require){
             this.obstacles = {};
 
             // randomly add obstacles
-            for(var i = 0; i < 5; i++){
+            for(var i = 0; i < 15; i++){
                 var x = Math.floor(Math.random() * this.width);
                 var y = Math.floor(Math.random() * this.height);
                 var obstacle = new Obstacle(i);

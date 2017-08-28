@@ -22,12 +22,15 @@ define(function(require){
             this.moveY = null;
             
             this.moveSpeed = 300;
+
+            this.size = 30;
             
             // previous values for interpolation
             
             this._x = 0;
             this._y = 0;
             this._angle = 0;
+            this._size = 30;
             
             this.init = true;
         }
@@ -66,6 +69,7 @@ define(function(require){
                 moveX: this.moveX,
                 moveY: this.moveY,
                 moveSpeed: this.moveSpeed,
+                size: this.size,
                 
             }
             
@@ -80,6 +84,7 @@ define(function(require){
                 this._x = s.x;
                 this._y = s.y;
                 this._angle = s.angle;
+                this._size = s.size;
             }
             else{
                 // any values that should be interpolated need to be copied here
@@ -87,6 +92,7 @@ define(function(require){
                 this._x = this.x;
                 this._y = this.y;
                 this._angle = this.angle;
+                this._size = this.size;
             }
             
             this.hp = s.hp;
@@ -101,6 +107,7 @@ define(function(require){
             this.moveY = s.moveY;
             
             this.moveSpeed = s.moveSpeed;
+            this.size = s.size;
         }
         
     } // End Player

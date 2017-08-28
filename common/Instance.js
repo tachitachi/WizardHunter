@@ -8,6 +8,7 @@ define(function(require){
     var GameMap = require('./GameMap');
     var Inputs = require('./Inputs');
     var Keys = Inputs.Keys;
+    var util = require('./util');
 
     class Instance {
         constructor(){
@@ -77,27 +78,33 @@ define(function(require){
                 return;
             }
 
+            if((Math.abs(player.x - player.moveX) < 5) && (Math.abs(player.y - player.moveY) < 5)){
+                player.moveX = null;
+                player.moveY = null;
+            }
 
+            // need to take into account collisions, based on map and entities
             if(player.moveX !== null && player.moveY !== null){
                 
                 var moveAngle = Math.atan2(player.moveY - player.y, player.moveX - player.x);
                 var deltaX = player.moveSpeed * delta * Math.cos(moveAngle);
                 var deltaY = player.moveSpeed * delta * Math.sin(moveAngle);
+
+
+                var deltas = util.getRigidCollisions(player, deltaX, deltaY, this.map.obstacles);
                 
-                player.x += deltaX;
-                player.y += deltaY;
+                player.x += deltas.x;
+                player.y += deltas.y;
                 
                 player.x = Math.floor(player.x);
                 player.y = Math.floor(player.y);
                 
-                if((Math.abs(player.x - player.moveX) < 5) && (Math.abs(player.y - player.moveY) < 5)){
-                    player.moveX = null;
-                    player.moveY = null;
-                }
+                
             }
             
             // calculate new angle
             // y axis is reversed, because down is +y
+            // this can be calculated independent of any collisions
             player.angle = Math.atan2(player.y - player.targetY, player.targetX - player.x);
             if(player.angle < 0){
                 player.angle += Math.PI * 2;

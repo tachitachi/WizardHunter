@@ -97,6 +97,8 @@ function GameInstance(){
                 this.instance.updatePlayer(player.id, delta);
                 //player.move(delta);
             }
+
+            // make each AI act
             
             this.prevTick = newTick;
             
