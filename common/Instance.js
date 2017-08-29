@@ -9,6 +9,7 @@ define(function(require){
     var Inputs = require('./Inputs');
     var Keys = Inputs.Keys;
     var util = require('./util');
+    var Spell = require('./Spell');
 
     class Instance {
         constructor(){
@@ -24,10 +25,16 @@ define(function(require){
             
         }
 
-        
+        getNextId(){
+            return this.nextId++;
+        }
+
+        setNextId(id){
+            this.nextId = id;
+        }
+
         addPlayer(){
-            var player = new Player(this.nextId);
-            this.nextId += 1;
+            var player = new Player(this.getNextId());
             
             // TODO: Make sure the player does not spawn in non walkable area
             player.x = Math.floor(Math.random() * this.map.width);
@@ -109,9 +116,13 @@ define(function(require){
             if(player.angle < 0){
                 player.angle += Math.PI * 2;
             }
+
+            player.delay = Math.max(0, player.delay - delta);
         }
         
         applyInputs(playerId, inputs){
+
+            var player = this.players[playerId];
             
             var keys = new Keys(inputs.keys);
             var targetX = inputs.targetX;
@@ -122,6 +133,15 @@ define(function(require){
             }
             
             this.setPlayerLook(playerId, targetX, targetY);
+
+
+            if(keys.get('d') === 1){
+
+                if(player.delay === 0){
+                    var rockWall = new Spell(this.getNextId(), 0);
+                    player.delay = rockWall.delay;
+                }
+            }
             
             return inputs.sequenceId;
         }
@@ -132,6 +152,7 @@ define(function(require){
 
             // ignore AoI for now
 
+            s.nextId = this.nextId;
             s.players = this.players;
             s.map = this.map.state;
 
@@ -141,6 +162,7 @@ define(function(require){
         // add more to this as the state space increases
         copyState(state){
 
+            this.nextId = state.nextId;
             var remotePlayers = state.players;
 
             // remove old players

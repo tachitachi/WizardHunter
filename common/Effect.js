@@ -1,25 +1,37 @@
 'use strict';
 
 
-function Effect(){
-    
+define(function(require){
+
     class Effect {
         
-        constructor(){
-            
+        constructor(effectId){
             console.log('Initializing Effect');
             
-            var self = this;
+            // time since starting
+            this.time = 0;
+
+            // time until effect ends
+            this.duration = 0;
+
+            this.target = null;
+            this.x = 0;
+            this.y = 0;
+
+            this.initialize(effectId);
             
-            // keep track of internal variables like health, animation time, etc
-            
+        }
+
+        initialize(effectId){
+
+        }
+
+        update(delta){
+            this.time += delta;
         }
         
         
     }
-    
-    return new Effect();
-}
 
-
-module.exports = Effect;
+    return Effect;
+});

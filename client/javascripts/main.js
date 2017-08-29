@@ -91,8 +91,8 @@ define(function(require){
         if(myPlayer !== undefined){
             // center camera around player plus some offset based on the mouse position
             var player = myPlayer.lerp(lerp_t);
-            canvas.centerX = player.x + global.offsetX / 5;
-            canvas.centerY = player.y + global.offsetY / 5;
+            canvas.centerX = player.x + global.offsetX / 10;
+            canvas.centerY = player.y + global.offsetY / 10;
         }
         
         

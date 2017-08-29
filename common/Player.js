@@ -22,8 +22,11 @@ define(function(require){
             this.moveY = null;
             
             this.moveSpeed = 300;
-
             this.size = 30;
+
+            this.delay = 0;
+
+            this.modifiers = [];
             
             // previous values for interpolation
             
@@ -70,6 +73,7 @@ define(function(require){
                 moveY: this.moveY,
                 moveSpeed: this.moveSpeed,
                 size: this.size,
+                delay: this.delay,
                 
             }
             
@@ -108,6 +112,7 @@ define(function(require){
             
             this.moveSpeed = s.moveSpeed;
             this.size = s.size;
+            this.delay = s.delay;
         }
         
     } // End Player

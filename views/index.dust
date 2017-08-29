@@ -7,7 +7,7 @@
   </head>
   <body>
     <div class="gameContainer">
-        <canvas id="game"></canvas>
+        <canvas id="game" tabindex="1"></canvas>
     </div>
   </body>
 </html>
