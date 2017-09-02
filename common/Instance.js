@@ -10,16 +10,15 @@ define(function(require){
     var Keys = Inputs.Keys;
     var util = require('./util');
     var Spell = require('./Spell');
+    var _ = require('underscore');
 
     class Instance {
         constructor(){
             console.log('Initializing Instance');
             
             this.map = new GameMap();
-            
-            this.players = {};
-            this.enemies = {};
-            this.effects = {};
+            this.actors = {};
+            this.spells = {};
             
             this.nextId = 0;
             
@@ -40,24 +39,24 @@ define(function(require){
             player.x = Math.floor(Math.random() * this.map.width);
             player.y = Math.floor(Math.random() * this.map.height);
             
-            this.players[player.id] = player;
+            this.actors[player.id] = player;
             
             return player.id;
             
         }
         
         removePlayer(playerId){
-            delete this.players[playerId];
+            delete this.actors[playerId];
         }
         
         // This moves instantaneously
         setPlayerLook(id, targetX, targetY){
-            if(!this.players.hasOwnProperty(id)){
+            if(!this.actors.hasOwnProperty(id)){
                 // error?
                 return;
             }
             
-            var player = this.players[id];
+            var player = this.actors[id];
             
             if(targetX !== null && targetY !== null){
                 player.targetX = targetX;
@@ -68,19 +67,33 @@ define(function(require){
         
         // TODO: add speed to this
         setPlayerMove(id, x, y){
-            if(!this.players.hasOwnProperty(id)){
+            if(!this.actors.hasOwnProperty(id)){
                 // error?
                 return;
             }
             
-            var player = this.players[id];
+            var player = this.actors[id];
             
             player.moveX = x;
             player.moveY = y;
         }
 
+        updateActor(id, delta){
+            var actor = this.actors[id];
+
+            switch(actor.type){
+            case 'player':
+                this.updatePlayer(id, delta);
+
+                break;
+            default:
+                // unknown type?
+                break;
+            }
+        }
+
         updatePlayer(id, delta){
-            var player = this.players[id];
+            var player = this.actors[id];
             if(player === undefined){
                 return;
             }
@@ -97,8 +110,12 @@ define(function(require){
                 var deltaX = player.moveSpeed * delta * Math.cos(moveAngle);
                 var deltaY = player.moveSpeed * delta * Math.sin(moveAngle);
 
+                var otherPlayers = _.extend({}, this.actors);
+                delete otherPlayers[id];
 
-                var deltas = util.getRigidCollisions(player, deltaX, deltaY, this.map.obstacles);
+                var collisionObstacles = _.values(otherPlayers).concat(_.values(this.map.obstacles));
+
+                var deltas = util.getRigidCollisions(player, deltaX, deltaY, collisionObstacles);
                 
                 player.x += deltas.x;
                 player.y += deltas.y;
@@ -119,10 +136,19 @@ define(function(require){
 
             player.delay = Math.max(0, player.delay - delta);
         }
+
+        updateSpell(id, delta){
+            var spell = this.spells[id];
+            if(spell === undefined){
+                return;
+            }
+
+            spell.update(delta);
+        }
         
         applyInputs(playerId, inputs){
 
-            var player = this.players[playerId];
+            var player = this.actors[playerId];
             
             var keys = new Keys(inputs.keys);
             var targetX = inputs.targetX;
@@ -138,7 +164,10 @@ define(function(require){
             if(keys.get('d') === 1){
 
                 if(player.delay === 0){
-                    var rockWall = new Spell(this.getNextId(), 0);
+                    var rockWall = new Spell(this.getNextId(), 0, player);
+
+                    this.spells[rockWall.id] = rockWall;
+
                     player.delay = rockWall.delay;
                 }
             }
@@ -153,8 +182,9 @@ define(function(require){
             // ignore AoI for now
 
             s.nextId = this.nextId;
-            s.players = this.players;
+            s.actors = this.actors;
             s.map = this.map.state;
+            s.spells = this.spells;
 
             return s;
         }
@@ -163,28 +193,54 @@ define(function(require){
         copyState(state){
 
             this.nextId = state.nextId;
-            var remotePlayers = state.players;
+            var remoteActors = state.actors;
+            var remoteSpells = state.spells;
 
             // remove old players
-            for(var i in this.players){
-                if(!remotePlayers.hasOwnProperty(i)){
-                    delete this.players[i];
+            for(var i in this.actors){
+                if(!remoteActors.hasOwnProperty(i)){
+                    delete this.actors[i];
                 }
             }
 
-            // Update and add any new players            
-            for(var i in remotePlayers){
-                var remotePlayer = remotePlayers[i];
+            // Update and add any new actors            
+            for(var i in remoteActors){
+                var remoteActor = remoteActors[i];
                 
-                if(!this.players.hasOwnProperty(remotePlayer.id)){
-                    console.log('copying unknown player');
-                    this.players[remotePlayer.id] = new Player();
+                if(!this.actors.hasOwnProperty(remoteActor.id)){
+                    this.actors[remoteActor.id] = new Player();
                 }
                 
-                var localPlayer = this.players[remotePlayer.id];
+                var localActor = this.actors[remoteActor.id];
                 
                 
-                localPlayer.state = remotePlayer;
+                localActor.state = remoteActor;
+            }
+
+
+
+            // remove old spells
+            for(var i in this.spells){
+                if(!remoteSpells.hasOwnProperty(i)){
+                    delete this.spells[i];
+                }
+            }
+
+            // Update and add any new spells            
+            for(var i in remoteSpells){
+                var remoteSpell = remoteSpells[i];
+                //console.log(remoteSpell.anchor);
+                
+                //console.log(this.spells);
+
+                if(!this.spells.hasOwnProperty(remoteSpell.id)){
+                    this.spells[remoteSpell.id] = new Spell(remoteSpell.id, remoteSpell.spellId, remoteSpell.anchor);
+                }
+                
+                var localSpell = this.spells[remoteSpell.id];
+                
+                
+                localSpell.state = remoteSpell;
             }
 
 
@@ -201,7 +257,7 @@ define(function(require){
                 return;
             }
             
-            var player = this.players[playerId];
+            var player = this.actors[playerId];
             if(player === undefined){
                 return;
             }

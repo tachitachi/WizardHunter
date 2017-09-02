@@ -87,7 +87,7 @@ define(function(require){
 
         gfx.clear(canvas);
 
-        var myPlayer = instance.players[playerId];
+        var myPlayer = instance.actors[playerId];
         if(myPlayer !== undefined){
             // center camera around player plus some offset based on the mouse position
             var player = myPlayer.lerp(lerp_t);
@@ -96,11 +96,18 @@ define(function(require){
         }
         
         
-        // draw players
-        for(var i in instance.players){
-            var player = instance.players[i].lerp(lerp_t);
-            
-            gfx.drawPlayer(canvas, player.x, player.y, player.angle, player.size);
+        // draw actors
+        for(var i in instance.actors){
+
+            var actor = instance.actors[i];
+            switch(actor.type){
+            case "player":
+                var player = instance.actors[i].lerp(lerp_t);
+                
+                gfx.drawPlayer(canvas, player.x, player.y, player.angle, player.size);
+                break;
+            }
+
         }
 
         // TODO: Group all of map drawing into a single function?

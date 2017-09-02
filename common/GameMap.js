@@ -10,6 +10,8 @@ define(function(require){
         constructor(){
             console.log('Initializing Map');
             // keep track of internal variables like health, animation time, etc
+
+            this.type = 'map';
             
             this.width = 1000;
             this.height = 700;

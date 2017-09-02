@@ -22,12 +22,14 @@ define(function(require){
             // simple pairwise testing for collision
             // assumes all test objects are immovable
 
+            var epsilon = 15;
+
             for(var i in objects){
                 var object = objects[i];
                 var dist2 = Math.pow(objA.x + deltaX - object.x, 2) + Math.pow(objA.y + deltaY - object.y, 2);
                 var rad2 = Math.pow(objA.size, 2) + Math.pow(object.size, 2);
 
-                if(dist2 < rad2){
+                if(dist2 < rad2 + epsilon){
                     return {x: 0, y: 0};
                 }
             }

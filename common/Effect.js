@@ -7,6 +7,7 @@ define(function(require){
         
         constructor(effectId){
             console.log('Initializing Effect');
+            this.type = 'effect';
             
             // time since starting
             this.time = 0;
@@ -23,7 +24,9 @@ define(function(require){
         }
 
         initialize(effectId){
-
+            if(effectId === 0){
+                // spawn rock
+            }
         }
 
         update(delta){

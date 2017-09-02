@@ -67,15 +67,15 @@ function GameInstance(){
             
             var playerList = [];
             
-            for(var id in this.instance.players){
-                var player = this.instance.players[id];
+            for(var id in this.instance.actors){
+                var player = this.instance.actors[id];
                 playerList.push(player.state);
             }
             
             // broadcast new state to each player
             // TODO: Use AoI to determine what info needs to be sent?
-            for(var id in this.instance.players){
-                var player = this.instance.players[id];
+            for(var id in this.instance.actors){
+                var player = this.instance.actors[id];
 
                 var state = this.instance.getState(player.id, true);
 
@@ -90,12 +90,19 @@ function GameInstance(){
             var delta = (newTick - this.prevTick) / 1000;
             
             // move each player
-            for(var id in this.instance.players){
-                var player = this.instance.players[id];
+            for(var id in this.instance.actors){
+                var actor = this.instance.actors[id];
                 
                 // TODO: use delta
-                this.instance.updatePlayer(player.id, delta);
+                this.instance.updateActor(actor.id, delta);
                 //player.move(delta);
+            }
+
+            // update each spell
+            for(var id in this.instance.spells){
+                var spell = this.instance.spells[id];
+
+                this.instance.updateSpell(spell.id, delta);
             }
 
             // make each AI act

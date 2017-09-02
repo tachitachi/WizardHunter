@@ -7,6 +7,7 @@ define(function(require){
     class Player {
         constructor(id){
             console.log('Initializing player');
+            this.type = 'player';
             this.id = id;
             
             // keep track of internal variables like health, animation time, etc
@@ -62,6 +63,7 @@ define(function(require){
         
         get state(){
             var s = {
+                type: this.type,
                 id: this.id,
                 hp: this.hp,
                 x: this.x,
@@ -99,6 +101,7 @@ define(function(require){
                 this._size = this.size;
             }
             
+            this.type = s.type;
             this.hp = s.hp;
             this.x = s.x;
             this.y = s.y;
