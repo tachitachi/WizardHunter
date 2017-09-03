@@ -11,10 +11,14 @@ define(function(require){
         constructor(id){
             console.log('Initializing Obstacle');
 
+            this.type = 'obstacle';
+
             this.id = id;
-            this.type = null;
             this.movable = false;
             this.breakable = false;
+
+            this.time = 0;
+            this.duration = null;
 
             this.x = 0;
             this.y = 0;
@@ -28,6 +32,21 @@ define(function(require){
             
         }
 
+        destroy(){
+
+        }
+
+        update(instance, delta){
+            if(this.duration !== null){
+                this.time += delta;
+
+                if(this.time > this.duration){
+                    this.destroy();
+                    delete instance.actors[this.id];
+                }
+            }
+        }
+
         initialize(x, y, options){
 
             this.x = x;
@@ -35,9 +54,6 @@ define(function(require){
             this._x = x;
             this._y = y;
 
-            if(options.hasOwnProperty('type')){
-                this.type = options.type;
-            }
             if(options.hasOwnProperty('size')){
                 this.size = options.size;
             }
@@ -46,6 +62,9 @@ define(function(require){
             }
             if(options.hasOwnProperty('breakable')){
                 this.breakable = options.breakable;
+            }
+            if(options.hasOwnProperty('duration')){
+                this.duration = options.duration;
             }
         }
 

@@ -99,12 +99,15 @@ define(function(require){
         // draw actors
         for(var i in instance.actors){
 
-            var actor = instance.actors[i];
+            var actor = instance.actors[i].lerp(lerp_t);
             switch(actor.type){
             case "player":
-                var player = instance.actors[i].lerp(lerp_t);
                 
-                gfx.drawPlayer(canvas, player.x, player.y, player.angle, player.size);
+                gfx.drawPlayer(canvas, actor.x, actor.y, actor.angle, actor.size);
+                break;
+            case "obstacle":
+                
+                gfx.drawRock(canvas, actor.x, actor.y, actor.size);
                 break;
             }
 

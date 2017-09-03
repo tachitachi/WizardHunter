@@ -3,6 +3,7 @@
 define(function(require){
 
     var util = require('./util');
+    var _ = require('underscore');
 
     class Player {
         constructor(id){
@@ -22,12 +23,13 @@ define(function(require){
             this.moveX = null;
             this.moveY = null;
             
+            this.baseSpeed = 300;
             this.moveSpeed = 300;
             this.size = 30;
 
             this.delay = 0;
 
-            this.modifiers = [];
+            this.effects = [];
             
             // previous values for interpolation
             
@@ -38,12 +40,60 @@ define(function(require){
             
             this.init = true;
         }
+
+        destroy(){
+
+        }
         
-        move(delta){
+        update(instance, delta){
             // move toward the move target
             // How to take into account collisions?
+
+            this.moveSpeed = this.baseSpeed;
+
+
+
+
+            if((Math.abs(this.x - this.moveX) < 5) && (Math.abs(this.y - this.moveY) < 5)){
+                this.moveX = null;
+                this.moveY = null;
+            }
+
+            // need to take into account collisions, based on map and entities
+            if(this.moveX !== null && this.moveY !== null){
+                
+                var moveAngle = Math.atan2(this.moveY - this.y, this.moveX - this.x);
+                var deltaX = this.moveSpeed * delta * Math.cos(moveAngle);
+                var deltaY = this.moveSpeed * delta * Math.sin(moveAngle);
+
+                var otherActors = _.extend({}, instance.actors);
+                delete otherActors[this.id];
+
+                var collisionObstacles = _.values(otherActors).concat(_.values(instance.map.obstacles));
+
+                var deltas = util.getRigidCollisions(this, deltaX, deltaY, collisionObstacles);
+
+                //console.log(deltas);
+                
+                this.x += deltas.x;
+                this.y += deltas.y;
+                
+                this.x = Math.floor(this.x);
+                this.y = Math.floor(this.y);
+                
+                
+            }
             
-            console.log('deprecated');
+            // calculate new angle
+            // y axis is reversed, because down is +y
+            // this can be calculated independent of any collisions
+            this.angle = Math.atan2(this.y - this.targetY, this.targetX - this.x);
+            if(this.angle < 0){
+                this.angle += Math.PI * 2;
+            }
+
+            this.delay = Math.max(0, this.delay - delta);
+
         }
         
         // interpolate the entity between the previous update and the current
@@ -73,6 +123,8 @@ define(function(require){
                 targetY: this.targetY,
                 moveX: this.moveX,
                 moveY: this.moveY,
+                effects: this.effects, // need to iterate and get state?
+                baseSpeed: this.baseSpeed,
                 moveSpeed: this.moveSpeed,
                 size: this.size,
                 delay: this.delay,
@@ -112,7 +164,11 @@ define(function(require){
             
             this.moveX = s.moveX;
             this.moveY = s.moveY;
+
+            // need to iterate and new?
+            this.effects = s.effects;
             
+            this.baseSpeed = s.baseSpeed;
             this.moveSpeed = s.moveSpeed;
             this.size = s.size;
             this.delay = s.delay;

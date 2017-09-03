@@ -10,6 +10,7 @@ define(function(require){
     var Keys = Inputs.Keys;
     var util = require('./util');
     var Spell = require('./Spell');
+    var Obstacle = require('./Obstacle');
     var _ = require('underscore');
 
     class Instance {
@@ -81,60 +82,7 @@ define(function(require){
         updateActor(id, delta){
             var actor = this.actors[id];
 
-            switch(actor.type){
-            case 'player':
-                this.updatePlayer(id, delta);
-
-                break;
-            default:
-                // unknown type?
-                break;
-            }
-        }
-
-        updatePlayer(id, delta){
-            var player = this.actors[id];
-            if(player === undefined){
-                return;
-            }
-
-            if((Math.abs(player.x - player.moveX) < 5) && (Math.abs(player.y - player.moveY) < 5)){
-                player.moveX = null;
-                player.moveY = null;
-            }
-
-            // need to take into account collisions, based on map and entities
-            if(player.moveX !== null && player.moveY !== null){
-                
-                var moveAngle = Math.atan2(player.moveY - player.y, player.moveX - player.x);
-                var deltaX = player.moveSpeed * delta * Math.cos(moveAngle);
-                var deltaY = player.moveSpeed * delta * Math.sin(moveAngle);
-
-                var otherPlayers = _.extend({}, this.actors);
-                delete otherPlayers[id];
-
-                var collisionObstacles = _.values(otherPlayers).concat(_.values(this.map.obstacles));
-
-                var deltas = util.getRigidCollisions(player, deltaX, deltaY, collisionObstacles);
-                
-                player.x += deltas.x;
-                player.y += deltas.y;
-                
-                player.x = Math.floor(player.x);
-                player.y = Math.floor(player.y);
-                
-                
-            }
-            
-            // calculate new angle
-            // y axis is reversed, because down is +y
-            // this can be calculated independent of any collisions
-            player.angle = Math.atan2(player.y - player.targetY, player.targetX - player.x);
-            if(player.angle < 0){
-                player.angle += Math.PI * 2;
-            }
-
-            player.delay = Math.max(0, player.delay - delta);
+            actor.update(this, delta);
         }
 
         updateSpell(id, delta){
@@ -143,7 +91,7 @@ define(function(require){
                 return;
             }
 
-            spell.update(delta);
+            spell.update(this, delta);
         }
         
         applyInputs(playerId, inputs){
@@ -208,7 +156,24 @@ define(function(require){
                 var remoteActor = remoteActors[i];
                 
                 if(!this.actors.hasOwnProperty(remoteActor.id)){
-                    this.actors[remoteActor.id] = new Player();
+
+                    var actor = undefined;
+
+                    switch(remoteActor.type){
+                    case 'player':
+                        actor = new Player(remoteActor.id);
+                        break;
+                    case 'obstacle':
+                        actor = new Obstacle(remoteActor.id);
+                        break;
+                    }
+
+                    if(actor === undefined){
+                        console.log('not sure what to do', remoteActor);
+                        continue;
+                    }
+
+                    this.actors[remoteActor.id] = actor;
                 }
                 
                 var localActor = this.actors[remoteActor.id];
@@ -269,7 +234,8 @@ define(function(require){
                     
                 var delta = inputs.delta / 1000.0;
                 
-                this.updatePlayer(playerId, delta);
+                //this.updateActor(playerId, delta);
+                player.update(this, delta);
                 //console.log(delta);
                 
                 

@@ -75,11 +75,13 @@ function GameInstance(){
             // broadcast new state to each player
             // TODO: Use AoI to determine what info needs to be sent?
             for(var id in this.instance.actors){
-                var player = this.instance.actors[id];
+                var actor = this.instance.actors[id];
 
-                var state = this.instance.getState(player.id, true);
+                if(actor.type === 'player'){
+                    var state = this.instance.getState(actor.id, true);
+                    this.sockets[actor.id].emit('tick', {state: state, sequenceId: this.sequenceIds[actor.id]});
+                }
 
-                this.sockets[player.id].emit('tick', {state: state, sequenceId: this.sequenceIds[player.id]});
             }
         }
         

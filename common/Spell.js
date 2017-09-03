@@ -2,6 +2,8 @@
 
 
 define(function(require){
+
+    var Obstacle = require('./Obstacle');
     
     class Spell {
         
@@ -16,6 +18,8 @@ define(function(require){
 
             // anchor can be a player, creature, obstacle, map, etc.
             this.anchor = anchor;
+
+            this.status = 0;
 
             // keep track of internal variables like health, animation time, etc
 
@@ -45,17 +49,50 @@ define(function(require){
             // rock wall
             if(this.spellId === 0){
                 this.duration = 2.0;
-                this.delay = 1.0;
+                this.delay = 0.6;
             }
         }
 
-        update(delta){
+        destroy(){
+
+        }
+
+        update(instance, delta){
             this.time += delta;
 
-            if(this.anchor !== undefined){
-                //console.log(this.anchor.x, this.anchor.y);
+            if(this.spellId === 0){
+                if(this.anchor !== undefined){
+                    //console.log(this.anchor.x, this.anchor.y);
 
+                    if(this.status === 0){
+
+                        // spawn wall pieces
+                        for(var i = -2; i <= 2; i++){
+
+                            var angle = this.anchor.angle + Math.PI / 6 * i;
+
+                            // attempt to spawn a rock
+                            var spawnX = this.anchor.x + 100 * Math.cos(angle);
+                            var spawnY = this.anchor.y - 100 * Math.sin(angle);
+
+                            var rock = new Obstacle(instance.getNextId());
+                            rock.initialize(spawnX, spawnY, {size: 20, movable: false, breakable: false, duration: 5});
+
+                            instance.actors[rock.id] = rock;
+
+                        }
+
+                        // apply slow to player
+                        
+
+                        this.status = 1;
+                    }
+
+
+                }
             }
+
+            
         }
 
         get state(){
@@ -63,6 +100,7 @@ define(function(require){
                 type: this.type,
                 id: this.id,
                 anchor: this.anchor,
+                status: this.status,
                 x: this.x,
                 time: this.time,
                 duration: this.duration,
@@ -86,7 +124,8 @@ define(function(require){
             
             this.type = s.type;
             this.id = s.id;
-            //this.anchor = s.anchor;
+            this.anchor = s.anchor;
+            this.status = s.status;
             this.x = s.x;
             this.time = s.time;
             this.duration = s.duration;

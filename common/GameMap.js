@@ -24,7 +24,7 @@ define(function(require){
                 var y = Math.floor(Math.random() * this.height);
                 var obstacle = new Obstacle(i);
 
-                obstacle.initialize(x, y, {type: 0, size: Math.random() * 15 + 5, movable: false, breakable: false})
+                obstacle.initialize(x, y, {size: Math.random() * 15 + 5, movable: false, breakable: false})
 
                 this.obstacles[i] = obstacle;
             }
