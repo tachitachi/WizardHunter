@@ -45,7 +45,7 @@ function Connection(io, instance){
             socket.on('input', function(inputs){
                 setTimeout(function(){
                     self.instance.updatePlayer(socket.id, inputs);
-                }, 200);
+                }, 100);
             });
             
         }

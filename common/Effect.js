@@ -33,6 +33,7 @@ define(function(require){
         initialize(){
             if(this.effectId === 0){
                 // slow movement speed
+                this.duration = 0.6;
             }
         }
 
@@ -44,8 +45,14 @@ define(function(require){
             this.time += delta;
         }
 
-        apply(target){
+        get expired(){
+            return this.duration > 0 ? this.time > this.duration : false;
+        }
 
+        apply(target){
+            if(this.effectId === 0){
+                target.moveSpeed = target.moveSpeed * 0;
+            }
         }
 
         get state(){

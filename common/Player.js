@@ -4,6 +4,7 @@ define(function(require){
 
     var util = require('./util');
     var _ = require('underscore');
+    var Effect = require('./Effect');
 
     class Player {
         constructor(id){
@@ -29,7 +30,7 @@ define(function(require){
 
             this.delay = 0;
 
-            this.effects = [];
+            this.effects = {};
             
             // previous values for interpolation
             
@@ -51,8 +52,18 @@ define(function(require){
 
             this.moveSpeed = this.baseSpeed;
 
-
-
+            for(var i in this.effects){
+                var effect = this.effects[i];
+                effect.update(instance, delta);
+                if(effect.expired){
+                    effect.destroy();
+                    delete this.effects[effect.id];
+                    console.log('removing effect', effect.id);
+                }
+                else{
+                    effect.apply(this);
+                }
+            }
 
             if((Math.abs(this.x - this.moveX) < 5) && (Math.abs(this.y - this.moveY) < 5)){
                 this.moveX = null;
@@ -72,14 +83,12 @@ define(function(require){
                 var collisionObstacles = _.values(otherActors).concat(_.values(instance.map.obstacles));
 
                 var deltas = util.getRigidCollisions(this, deltaX, deltaY, collisionObstacles);
-
-                //console.log(deltas);
                 
                 this.x += deltas.x;
                 this.y += deltas.y;
                 
-                this.x = Math.floor(this.x);
-                this.y = Math.floor(this.y);
+                //this.x = Math.floor(this.x);
+                //this.y = Math.floor(this.y);
                 
                 
             }
@@ -87,10 +96,14 @@ define(function(require){
             // calculate new angle
             // y axis is reversed, because down is +y
             // this can be calculated independent of any collisions
-            this.angle = Math.atan2(this.y - this.targetY, this.targetX - this.x);
-            if(this.angle < 0){
-                this.angle += Math.PI * 2;
+
+            if(this.moveSpeed > 0){
+                this.angle = Math.atan2(this.y - this.targetY, this.targetX - this.x);
+                if(this.angle < 0){
+                    this.angle += Math.PI * 2;
+                }
             }
+
 
             this.delay = Math.max(0, this.delay - delta);
 
@@ -112,6 +125,12 @@ define(function(require){
         }
         
         get state(){
+
+            var effects = [];
+            for(var i in this.effects){
+                effects.push(this.effects[i].state);
+            }
+
             var s = {
                 type: this.type,
                 id: this.id,
@@ -123,7 +142,7 @@ define(function(require){
                 targetY: this.targetY,
                 moveX: this.moveX,
                 moveY: this.moveY,
-                effects: this.effects, // need to iterate and get state?
+                effects: effects, // need to iterate and get state?
                 baseSpeed: this.baseSpeed,
                 moveSpeed: this.moveSpeed,
                 size: this.size,
@@ -135,6 +154,8 @@ define(function(require){
         }
         
         set state(s){
+
+            //console.log(s);
             
             // Do not interpolate if this unit was newly created
             if(this.init){
@@ -165,8 +186,17 @@ define(function(require){
             this.moveX = s.moveX;
             this.moveY = s.moveY;
 
+
+            var effects = {};
+            for(var i = 0; i < s.effects.length; i++){
+                var effect = new Effect(s.effects[i].id, s.effects[i].effectId);
+                effect.state = s.effects[i];
+                effects[effect.id] = effect;
+                //console.log('did stuff');
+            }
+
             // need to iterate and new?
-            this.effects = s.effects;
+            this.effects = effects;
             
             this.baseSpeed = s.baseSpeed;
             this.moveSpeed = s.moveSpeed;

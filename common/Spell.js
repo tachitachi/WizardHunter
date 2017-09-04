@@ -4,6 +4,7 @@
 define(function(require){
 
     var Obstacle = require('./Obstacle');
+    var Effect = require('./Effect');
     
     class Spell {
         
@@ -83,7 +84,9 @@ define(function(require){
                         }
 
                         // apply slow to player
-                        
+                        var slowEffect = new Effect(instance.getNextId(), 0);
+                        this.anchor.effects[slowEffect.id] = slowEffect;
+
 
                         this.status = 1;
                     }

@@ -129,10 +129,20 @@ define(function(require){
 
             // ignore AoI for now
 
+            var actors = {};
+            for(var id in this.actors){
+                actors[id] = this.actors[id].state;
+            }
+
+            var spells = {};
+            for(var id in this.spells){
+                spells[id] = this.spells[id].state;
+            }
+
             s.nextId = this.nextId;
-            s.actors = this.actors;
             s.map = this.map.state;
-            s.spells = this.spells;
+            s.actors = actors;
+            s.spells = spells;
 
             return s;
         }
