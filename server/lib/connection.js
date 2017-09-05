@@ -20,7 +20,14 @@ function Connection(io, instance){
             var self = this;
             
             console.log(socket.id);
+
+            var pingAmount = 200;
             
+            socket.on('sync', function(message){
+                setTimeout(function(){
+                    socket.emit('sync', {time: +new Date()});
+                }, pingAmount);
+            });
             
             socket.on('init', function(message){
                 console.log('playerInit', message);
@@ -45,7 +52,7 @@ function Connection(io, instance){
             socket.on('input', function(inputs){
                 setTimeout(function(){
                     self.instance.updatePlayer(socket.id, inputs);
-                }, 100);
+                }, pingAmount);
             });
             
         }

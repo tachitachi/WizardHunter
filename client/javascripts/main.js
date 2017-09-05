@@ -21,6 +21,11 @@ define(function(require){
     var sequenceId = 0;
     
     var instance = new Instance();
+
+    var clientStart = +new Date();
+    var serverStart = null;
+    var timeOffset = 0;
+    var ping = 0;
     
     
     function sendInput(delta){
@@ -76,11 +81,18 @@ define(function(require){
     
     
     var prevGameTick = 0;
+    var tickRemainder = 0;
     
     function gameLoop(timestamp){
         
         var newGameTick = performance.now();
-        var delta = newGameTick - prevGameTick;
+        var delta = (newGameTick - prevGameTick) / 1000 + tickRemainder;
+
+        var fixedDelta = core.modDelta(delta);
+
+        tickRemainder = fixedDelta.remainder;
+        delta = fixedDelta.delta;
+
         prevGameTick = newGameTick;
         
         // clear screen
@@ -134,7 +146,16 @@ define(function(require){
     
     
     // Include player name in this
+    clientStart = +new Date();
+    socket.emit('sync', {});
     socket.emit('init', {});
+    
+    socket.on('sync', function(message){
+        serverStart = message.time;
+        timeOffset = clientStart - serverStart;
+        ping = (serverStart - clientStart) / 2;
+        console.log('ping', ping);
+    });
     
     socket.on('joined', function(message){
         playerId = message.id;
@@ -146,7 +167,7 @@ define(function(require){
         queue.clear(message.sequenceId);
        
         var newTick = performance.now();
-        _delta = (newTick - prevTick);
+        _delta = (newTick - prevTick) / 1000;
         prevTick = newTick;
         lerp_t = 0;
 

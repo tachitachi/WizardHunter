@@ -26,7 +26,8 @@ function GameInstance(){
             this.clientUpdateInterval = setInterval(this.ClientUpdate.bind(this), 45); // 22 hz
             this.serverUpdateInterval = setInterval(this.ServerUpdate.bind(this), 15); // 66 hz
             
-            this.prevTick = +new Date();
+            this.prevTick = process.hrtime();
+            this.tickRemainder = 0;
         }
         
         
@@ -88,24 +89,30 @@ function GameInstance(){
         ServerUpdate(){
             // update player movements, AI actions, health, etc
             
-            var newTick = +new Date();
-            var delta = (newTick - this.prevTick) / 1000;
+            var newTick = process.hrtime();
+            var delta = process.hrtime(this.prevTick);
+            delta = delta[0] + delta[1] / 1e9 + this.tickRemainder;
+
+            //console.log(delta, core.timestep);
+            //console.log(core.modDelta(delta));
+            var fixedDelta = core.modDelta(delta);
+            this.tickRemainder = fixedDelta.remainder;
             
             // move each player
             for(var id in this.instance.actors){
                 var actor = this.instance.actors[id];
                 
                 // TODO: use delta
-                this.instance.updateActor(actor.id, delta);
+                this.instance.updateActor(actor.id, fixedDelta.delta, true);
                 //player.move(delta);
             }
 
             // update each spell
-            for(var id in this.instance.spells){
-                var spell = this.instance.spells[id];
+            // for(var id in this.instance.spells){
+            //     var spell = this.instance.spells[id];
 
-                this.instance.updateSpell(spell.id, delta);
-            }
+            //     this.instance.updateSpell(spell.id, delta);
+            // }
 
             // make each AI act
             

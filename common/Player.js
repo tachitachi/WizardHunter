@@ -8,7 +8,7 @@ define(function(require){
 
     class Player {
         constructor(id){
-            console.log('Initializing player');
+            console.log('Initializing player', id);
             this.type = 'player';
             this.id = id;
             
@@ -46,7 +46,7 @@ define(function(require){
 
         }
         
-        update(instance, delta){
+        update(instance, delta, updateSubActors){
             // move toward the move target
             // How to take into account collisions?
 

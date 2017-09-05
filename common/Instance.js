@@ -79,19 +79,33 @@ define(function(require){
             player.moveY = y;
         }
 
-        updateActor(id, delta){
+        updateActor(id, delta, updateSubActors){
             var actor = this.actors[id];
 
-            actor.update(this, delta);
+            actor.update(this, delta, updateSubActors);
+
+            // update all spells owned by actor
+            for(var i in this.spells){
+                var spell = this.spells[i];
+                if(spell.anchor.id === id){
+                    this.updateSpell(spell.id, delta, updateSubActors);
+                }
+            }
         }
 
-        updateSpell(id, delta){
+        updateSpell(id, delta, updateSubActors){
             var spell = this.spells[id];
             if(spell === undefined){
                 return;
             }
 
-            spell.update(this, delta);
+            spell.update(this, delta, updateSubActors);
+
+            if(spell.expired){
+                spell.destroy();
+                delete this.spells[spell.id];
+                console.log('removing spell', id);
+            }
         }
         
         applyInputs(playerId, inputs){
@@ -236,21 +250,40 @@ define(function(require){
             if(player === undefined){
                 return;
             }
+
+            // get state beforehand
+            var startState = this.getState(playerId, false);
             
             for(var i in inputSequence){
                 var inputs = inputSequence[i];
                 this.applyInputs(playerId, inputs.input);
                 
                     
-                var delta = inputs.delta / 1000.0;
+                var delta = inputs.delta;
                 
-                //this.updateActor(playerId, delta);
-                player.update(this, delta);
+                //console.log(delta);
+
+                this.updateActor(playerId, delta, false);
+                //player.update(this, delta);
                 //console.log(delta);
                 
                 
                 
             }
+
+            // get state afterward
+
+//            var endState = this.getState(playerId, false);
+//
+//            console.log(startState, endState);
+//
+//            // for each actor, if they are close enough, use the end state to remove jerkiness
+//
+//            for(var actorId in endState.actors){
+//                if(startState.actors.hasOwnProperty(actorId)){
+//                    if 
+//                }
+//            }
             
         }
         

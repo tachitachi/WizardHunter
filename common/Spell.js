@@ -10,7 +10,7 @@ define(function(require){
         
         constructor(id, spellId, anchor){
             
-            console.log('Initializing Spell', id);
+            console.log('Initializing Spell', id, anchor.id);
 
             this.type = 'spell';
 
@@ -49,7 +49,7 @@ define(function(require){
         initialize(){
             // rock wall
             if(this.spellId === 0){
-                this.duration = 2.0;
+                this.duration = 0.6;
                 this.delay = 0.6;
             }
         }
@@ -58,7 +58,11 @@ define(function(require){
 
         }
 
-        update(instance, delta){
+        get expired(){
+            return this.duration > 0 ? this.time > this.duration : false;
+        }
+
+        update(instance, delta, updateSubActors){
             this.time += delta;
 
             if(this.spellId === 0){
@@ -68,24 +72,27 @@ define(function(require){
                     if(this.status === 0){
 
                         // spawn wall pieces
-                        for(var i = -2; i <= 2; i++){
+                        if(updateSubActors === true){
+                            for(var i = -2; i <= 2; i++){
 
-                            var angle = this.anchor.angle + Math.PI / 6 * i;
+                                var angle = this.anchor.angle + Math.PI / 6 * i;
 
-                            // attempt to spawn a rock
-                            var spawnX = this.anchor.x + 100 * Math.cos(angle);
-                            var spawnY = this.anchor.y - 100 * Math.sin(angle);
+                                // attempt to spawn a rock
+                                var spawnX = this.anchor.x + 100 * Math.cos(angle);
+                                var spawnY = this.anchor.y - 100 * Math.sin(angle);
 
-                            var rock = new Obstacle(instance.getNextId());
-                            rock.initialize(spawnX, spawnY, {size: 20, movable: false, breakable: false, duration: 5});
+                                var rock = new Obstacle(instance.getNextId());
+                                rock.initialize(spawnX, spawnY, {size: 20, movable: false, breakable: false, duration: 5});
 
-                            instance.actors[rock.id] = rock;
+                                instance.actors[rock.id] = rock;
 
+                            }
                         }
 
                         // apply slow to player
                         var slowEffect = new Effect(instance.getNextId(), 0);
                         this.anchor.effects[slowEffect.id] = slowEffect;
+                        console.log('applying slow');
 
 
                         this.status = 1;
