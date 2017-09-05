@@ -1,5 +1,17 @@
+'use strict';
+
 define(function(require){
 
+    var Sprite = require('./Sprite');
+
+
+    var fireball = {};
+    fireball.image = new Image();
+    fireball.image.src =  'client/images/flame_sprite.png';
+    fireball.width = 512;
+    fireball.height = 512;
+    fireball.frames = 6;
+    fireball.frame_rate = 20;
 
 
     var gfx = {
@@ -60,6 +72,17 @@ define(function(require){
             var triangleSize = 10;
             
             gfx.drawTriangle(canvas, pointerX, pointerY, triangleSize, angle);
+        },
+
+        drawFireball: function(canvas, centerX, centerY, angle, size, tick){
+            var sprite = new Sprite(canvas, fireball.image, fireball.width, fireball.height, fireball.frames);
+
+            var frame_number = Math.floor(tick / (1000 / fireball.frame_rate)) % fireball.frames;
+
+            var x = canvas.transformX(centerX - size / 2);
+            var y = canvas.transformY(centerY - size / 2);
+
+            sprite.render(x, y, size, size, frame_number, angle);
         },
 
         drawRock: function(canvas, centerX, centerY, size){

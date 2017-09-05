@@ -132,7 +132,15 @@ define(function(require){
             var obstacle = instance.map.obstacles[i].lerp(lerp_t);
             
             gfx.drawRock(canvas, obstacle.x, obstacle.y, obstacle.size);
+            //gfx.drawFireball(canvas, obstacle.x, obstacle.y, 0, obstacle.size);
         }
+
+        // draw effects
+        //if(myPlayer !== undefined){
+        //    gfx.drawFireball(canvas, myPlayer.x, myPlayer.y, 0, 50);
+        //}
+
+        gfx.drawFireball(canvas, 600, 600, Math.PI / 2, 150, newGameTick);
         
         
         lerp_t += delta / _delta;
